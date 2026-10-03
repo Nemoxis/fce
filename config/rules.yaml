@@ -1,0 +1,18 @@
+# Regole per linea che non si possono leggere dalle tabelle.
+#
+# no_tratte_locali: gruppi di fermate tra cui NON si puo' viaggiare con quella linea
+# (es. nota FCE "Sulle tratte Mascali - Giarre - Acireale - Catania
+#  NON SI EFFETTUA SERVIZIO PER SALITA PASSEGGERI").
+# Se partenza e arrivo stanno nello stesso gruppo, la corsa non viene proposta.
+# I valori sono prefissi della chiave fermata (maiuscolo, senza accenti/punteggiatura).
+#
+# controlla_nota: se questo testo compare nel PDF ma la regola non e' configurata,
+# la pipeline lo segnala nel report.
+
+linee:
+  - titolo_contiene: "VIA A18"
+    no_tratte_locali:
+      - ["MASCALI", "GIARRE", "ACIREALE", "CATANIA", "METRO"]
+      - ["FIUMEFREDDO", "GIARRE", "RIPOSTO"]
+
+controlla_nota: "NON SI EFFETTUA SERVIZIO PER SALITA"

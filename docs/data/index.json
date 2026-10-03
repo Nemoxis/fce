@@ -1,0 +1,31 @@
+{
+ "versions": [
+  {
+   "valid_from": "2026-09-15",
+   "file": "orario-2026-09-15.json",
+   "trips": 248,
+   "source": {
+    "file": "autolinee-2026-09-15.pdf",
+    "url": "https://www.circumetnea.it/download/orario-autolinee-in-vigore-dal-15-settembre-2026/?wpdmdl=18229&refresh=6ac168e3ed2321791060195",
+    "sha256": "77bf9169af5070bb0bfddf25bdda0913f68b297a2f8a43cd12ef7d5fa65374ac"
+   },
+   "generated": "2026-10-03T20:58:58+00:00"
+  },
+  {
+   "valid_from": "2026-10-05",
+   "file": "orario-2026-10-05.json",
+   "trips": 256,
+   "source": {
+    "file": "autolinee-2026-10-05.pdf",
+    "url": "https://www.circumetnea.it/download/orario-autolinee-in-vigore-dal-5-ottobre-2026/?wpdmdl=18300&refresh=6ac168e2b97c91791060194",
+    "sha256": "2d0afd6919861156c421108f588efdba6c84d3a1271cb824ba19d3a3cf28d9df"
+   },
+   "generated": "2026-10-03T20:58:52+00:00"
+  }
+ ],
+ "status": {
+  "last_check": "2026-10-03",
+  "errors": [],
+  "pending": []
+ }
+}

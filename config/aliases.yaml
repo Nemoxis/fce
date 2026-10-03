@@ -1,0 +1,54 @@
+# Nomi delle fermate.
+# La pipeline unisce gia' da sola le varianti che differiscono solo per maiuscole,
+# accenti, punteggiatura e "P." = "Piazza"; tutte le fermate "... METRO XYZ" diventano "METRO XYZ".
+# Qui aggiungi:
+#   - "nome": come vuoi vederla nell'app
+#   - "varianti": altri modi in cui FCE la scrive e che vanno considerati la stessa fermata
+# Dopo ogni aggiornamento, state/reports/report-*.json elenca tutte le fermate trovate:
+# se ne vedi due che sono la stessa, aggiungi qui una variante.
+
+fermate:
+  METRO BORGO:       { nome: "Catania – Metro Borgo (via Etnea)" }
+  METRO MILO:        { nome: "Catania – Metro Milo" }
+  METRO NESIMA:      { nome: "Catania – Metro Nesima" }
+  METRO FONTANA:
+    nome: "Catania – Metro Fontana"
+    varianti: ["TERMINAL FONTANA", "Metro Fontana (terminal bus)"]
+  METRO MONTE PO:    { nome: "Catania – Metro Monte Po" }
+  MONTE PO:
+    nome: "Catania – Monte Po (centro)"
+    varianti: ["MONTE PO' Centro"]
+  CATANIA S SOFIA:   { nome: "Catania – Santa Sofia" }
+  CATANIA PIAZZA ROMA: { nome: "Catania – Piazza Roma" }
+  CATANIA PIAZZA RISORGIMENTO: { nome: "Catania – Piazza Risorgimento" }
+  CATANIA PIAZZA S M DI GESU:  { nome: "Catania – Piazza S. Maria di Gesù" }
+  CATANIA EX FERMATA FCE LINERI SUD:
+    nome: "Catania – Lineri Sud (ex fermata FCE)"
+    varianti: ["LINERI SUD"]
+  VIA CARLO MAX MONTE PO: { nome: "Catania – Monte Po (via Carlo Marx)" }
+
+  S M LICODIA:       { nome: "Santa Maria di Licodia" }
+  STAZIONE FCE LICODIA SUD: { nome: "Santa Maria di Licodia – Licodia Sud (stazione FCE)" }
+
+  PATERNO:           { nome: "Paternò" }
+  PATERNO STAZIONE FCE: { nome: "Paternò – Stazione FCE" }
+  PATERNO PARCO DEL SOLE: { nome: "Paternò – Parco del Sole" }
+  PATERNO CORSO DEL POPOLO: { nome: "Paternò – Corso del Popolo" }
+
+  PIANO TAVOLA:
+    nome: "Piano Tavola"
+    varianti: ["PIANO TAVOLA Via Nazionale"]
+  VALCORRENTE:
+    nome: "Valcorrente (Etnapolis)"
+    varianti: ["VALCORRENTE Strada Provinciale 229 - Etnapolis"]
+  MISTERBIANCO:
+    nome: "Misterbianco"
+    varianti: ["MISTERBIANCO Via Giuseppe Verdi"]
+  MISTERBIANCO VIA GARIBALDI: { nome: "Misterbianco – via Garibaldi" }
+
+  ADRANO PIAZZA SANT AGOSTINO: { nome: "Adrano – Piazza Sant'Agostino" }
+  BIANCAVILLA PIAZZA SGRICCIO: { nome: "Biancavilla – Piazza Sgriccio" }
+  MOTTA SANT ANASTASIA: { nome: "Motta Sant'Anastasia" }
+  FIUMEFREDDO CONTRADA PONTE BORIA: { nome: "Fiumefreddo – Contrada Ponte Boria" }
+  FIUMEFREDDO CENTRO: { nome: "Fiumefreddo – Centro" }
+  GIARRE PARCO JUNGO: { nome: "Giarre – Parco Jungo" }

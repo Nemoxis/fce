@@ -1,0 +1,32 @@
+{
+ "packages": {
+  "manuale:FCE_AUTOBUS_DAL_15_SETTEMBRE_2026.pdf": {
+   "title": "FCE_AUTOBUS_DAL_15_SETTEMBRE_2026.pdf",
+   "status": "ok",
+   "valid_from": "2026-09-15"
+  },
+  "18300": {
+   "title": "ORARIO AUTOLINEE IN VIGORE DAL 5 OTTOBRE 2026",
+   "category": "autolinee",
+   "sha256": "2d0afd6919861156c421108f588efdba6c84d3a1271cb824ba19d3a3cf28d9df",
+   "valid_from": "2026-10-05",
+   "status": "ok",
+   "url": "https://www.circumetnea.it/download/orario-autolinee-in-vigore-dal-5-ottobre-2026/?wpdmdl=18300&refresh=6ac168e2b97c91791060194",
+   "reason": "",
+   "processed": "2026-10-03T22:58",
+   "verified": "2026-10-03"
+  },
+  "18229": {
+   "title": "ORARIO AUTOLINEE IN VIGORE DAL 15 SETTEMBRE 2026",
+   "category": "autolinee",
+   "sha256": "77bf9169af5070bb0bfddf25bdda0913f68b297a2f8a43cd12ef7d5fa65374ac",
+   "valid_from": "2026-09-15",
+   "status": "ok",
+   "url": "https://www.circumetnea.it/download/orario-autolinee-in-vigore-dal-15-settembre-2026/?wpdmdl=18229&refresh=6ac168e3ed2321791060195",
+   "reason": "",
+   "processed": "2026-10-03T22:58",
+   "verified": "2026-10-03"
+  }
+ },
+ "last_errors": []
+}

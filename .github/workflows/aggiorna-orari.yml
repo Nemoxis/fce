@@ -1,0 +1,71 @@
+name: Aggiorna orari FCE
+
+# Controlla il sito FCE, elabora i PDF nuovi e pubblica l'app su GitHub Pages.
+# Non serve fare niente a mano: quando FCE pubblica un nuovo PDF, entro 2 ore
+# (di giorno) i dati dell'app vengono aggiornati.
+
+on:
+  schedule:
+    - cron: "17 4-21/2 * * *"    # ogni 2 ore, circa 6-23 ora italiana (cron in UTC)
+    - cron: "47 22 * * *"        # un controllo notturno
+  workflow_dispatch: {}          # pulsante "Run workflow" per lanciarlo a mano
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: aggiorna-orari
+  cancel-in-progress: false
+
+jobs:
+  aggiorna:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Controlla il sito FCE ed elabora i nuovi PDF
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -m pipeline.update
+
+      - name: Controlli sui dati
+        run: python -m tests.test_orari
+
+      - name: Salva i dati nel repository
+        run: |
+          git config user.name "orari-bot"
+          git config user.email "orari-bot@users.noreply.github.com"
+          git add -A docs/data state pdf_archive pdf_inbox
+          if git diff --cached --quiet; then
+            echo "Nessuna novita'"
+          else
+            git commit -m "Aggiornamento orari $(date -u +%Y-%m-%dT%H:%M)"
+            git push
+          fi
+
+      - name: Prepara il sito
+        uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Pubblica su GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

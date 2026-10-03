@@ -1,0 +1,16 @@
+{
+  "name": "Bus FCE – orari",
+  "short_name": "Bus FCE",
+  "description": "Orari delle autolinee Ferrovia Circumetnea: scegli partenza e arrivo.",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F1F3F2",
+  "theme_color": "#1F5DA6",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,17 @@
+# Dove cercare i PDF e quali elaborare.
+sito: "https://www.circumetnea.it"
+pagina_orari: "https://www.circumetnea.it/le-nostre-linee/"
+
+# Le categorie vengono riconosciute dal titolo del download sul sito.
+categorie:
+  autolinee:
+    parole: ["autolinee", "autobus", "autoservizio"]
+    escludi: ["sagra"]
+  treni:
+    parole: ["treni", "ferrovia"]
+  metro:
+    parole: ["metro"]
+
+# Categorie da elaborare. Il parser e' pensato per le tabelle autobus;
+# "treni" e "metro" si possono aggiungere qui dopo aver controllato i report.
+elabora: ["autolinee"]

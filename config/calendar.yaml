@@ -1,0 +1,44 @@
+# Calendario usato per decidere quali corse circolano in un dato giorno.
+# Le autolinee FCE non circolano la domenica e nei festivi.
+# Le corse "scolastiche" circolano solo nei giorni di lezione.
+
+# Festivita' nazionali a data fissa (MM-DD). Pasqua e Pasquetta sono calcolate.
+# Il 4 ottobre (San Francesco) e' festa nazionale dal 2026 (L. 151/2025).
+festivita_nazionali:
+  - "01-01"   # Capodanno
+  - "01-06"   # Epifania
+  - "04-25"   # Liberazione
+  - "05-01"   # Festa del lavoro
+  - "06-02"   # Repubblica
+  - "08-15"   # Ferragosto
+  - "10-04"   # San Francesco d'Assisi
+  - "11-01"   # Ognissanti
+  - "12-08"   # Immacolata
+  - "12-25"   # Natale
+  - "12-26"   # Santo Stefano
+
+# Feste patronali: i PDF FCE non dicono se il servizio cambia.
+# Se scopri che in una certa data le corse non circolano, aggiungila qui (AAAA-MM-GG).
+# Nell'app queste date mostrano solo un avviso, a meno che tu non le sposti in "festivita_extra".
+avvisi_feste_patronali:
+  - { data: "02-05", nome: "Sant'Agata (Catania)" }
+  - { data: "01-20", nome: "San Sebastiano (Acireale)" }
+  - { data: "03-19", nome: "San Giuseppe (Randazzo)" }
+  - { data: "05-15", nome: "Sant'Isidoro (Giarre)" }
+  - { data: "06-29", nome: "San Pietro (Riposto)" }
+  - { data: "09-01", nome: "Sant'Egidio (Linguaglossa)" }
+
+# Date extra in cui il servizio e' sospeso del tutto (AAAA-MM-GG).
+festivita_extra: []
+
+# Calendario scolastico Regione Sicilia. Aggiorna ogni anno (di solito ad aprile-agosto).
+# Fonte 2026/27: D.A. n. 1396 del 01/04/2026, modificato dal D.A. n. 3119 del 03/08/2026.
+# ATTENZIONE: la fine lezioni e' riportata come 9 giugno (USR Sicilia) o 10 giugno (testo originario). Verifica a maggio.
+anni_scolastici:
+  - inizio: "2026-09-15"
+    fine: "2027-06-09"
+    sospensioni:
+      - ["2026-11-02", "2026-11-02"]
+      - ["2026-12-07", "2026-12-07"]
+      - ["2026-12-23", "2027-01-07"]
+      - ["2027-03-25", "2027-03-30"]
