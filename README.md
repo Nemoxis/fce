@@ -77,7 +77,7 @@ Riceverai un messaggio quando un nuovo orario viene pubblicato, quando un PDF no
 - L'ora di partenza predefinita è **quella attuale**: la lista mostra i bus da adesso in poi e si aggiorna da sola ogni minuto. Se cambi l'orario, compare il pulsante **Adesso** per tornare all'ora corrente.
 - Quando riapri l'app (anche il giorno dopo) riparte da oggi e da adesso, e controlla se sono stati pubblicati orari nuovi.
 - Se FCE pubblica un orario con data futura, l'app usa automaticamente quello giusto per il giorno scelto.
-- Per i paesi con più fermate c'è la voce **"<Paese> – tutte le fermate"** (es. "Catania – tutte le fermate"): come arrivo vale la prima fermata del paese raggiunta dal bus, come partenza la prima in cui passa. Il paese di ogni fermata si ricava dal nome; le eccezioni sono in `config/aliases.yaml` (sezione `comuni`).
+- Per i paesi con più fermate c'è la voce **"(paese) – tutte le fermate"** (es. "Catania – tutte le fermate"): come arrivo vale la prima fermata del paese raggiunta dal bus, come partenza la prima in cui passa. Il paese di ogni fermata si ricava dal nome; le eccezioni sono in `config/aliases.yaml` (sezione `comuni`).
 - Se non c'è un bus diretto, o con un cambio si arriva prima, l'app propone viaggi con **un cambio**. Non propone cambi tra due corse della stessa linea, attese oltre 90 minuti o viaggi oltre 3 ore.
 
 ## Installare l'app su Android
