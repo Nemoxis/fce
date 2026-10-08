@@ -1,7 +1,7 @@
 // Service worker: app utilizzabile offline.
 // Guscio dell'app: cache-first. Dati orari: rete prima, cache se offline.
-const SHELL = "fce-shell-v5";
-const DATA = "fce-data-v5";
+const SHELL = "fce-shell-v6";
+const DATA = "fce-data-v6";
 const FILES = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/logo-fce.png"];
 
 self.addEventListener("install", (e) => {
