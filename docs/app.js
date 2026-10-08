@@ -218,9 +218,10 @@ function tripItem(r, d, isNext, gone) {
   li.querySelector(".track").append(dur);
   const nStops = r.j - r.i - 1;
   li.querySelector(".meta").textContent =
-    `${r.route.name}. Corsa ${r.t.c}, ${nStops > 0 ? `${nStops} fermate intermedie` : "senza fermate intermedie"}.`;
+    `${r.route.name} · Corsa ${r.t.c} · ${nStops > 0 ? `${nStops} fermate intermedie` : "diretta"}`;
   const tags = li.querySelector(".tags");
   const tag = (cls, txt) => { const s = document.createElement("span"); s.className = `tag ${cls}`; s.textContent = txt; tags.append(s); };
+  if (isNext) tag("next", "Prossima");
   if (!r.runs) tag("off", `Non circola: ${r.why}`);
   if (r.t.f.includes("school")) tag("school", "Scolastica");
   if (r.t.f.includes("nosat")) tag("off", "No sabato");
