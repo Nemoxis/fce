@@ -300,10 +300,13 @@ async function refresh() {
     const more = document.createElement("button");
     more.className = "more"; more.type = "button";
     more.textContent = `Mostra ${past.length === 1 ? "la corsa precedente" : `le ${past.length} corse precedenti`}`;
-    more.addEventListener("click", () => { past.forEach((r) => ulPast.append(tripItem(r, d, false, isToday))); more.remove(); });
+    more.addEventListener("click", () => {
+      // le corse passate entrano nella stessa lista, cosi' la spaziatura e' identica
+      [...past].reverse().forEach((r) => ul.prepend(tripItem(r, d, false, isToday)));
+      more.remove();
+    });
     out.append(more);
   }
-  const ulPast = document.createElement("ul"); ulPast.className = "trips"; out.append(ulPast);
   upcoming.forEach((r, k) => ul.append(tripItem(r, d, k === 0, false)));
   if (running.length && !upcoming.length) out.append(isToday && state.time === null
     ? notice("Per oggi le corse sono finite", "Guarda gli orari di domani.")
