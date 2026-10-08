@@ -113,27 +113,27 @@ button, input { font-family: inherit; }
 .options .group { font-size: .82rem; font-weight: 600; color: var(--primary); padding: 10px 16px 4px; cursor: default; text-transform: uppercase; letter-spacing: .03em; }
 .options .group:hover { background: none; }
 
-/* ---- quando: selettore a pillola come "Ticket / Abbonamenti" */
-.when { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
-.chips {
-  display: flex; flex: 1 1 170px; background: var(--band); border-radius: 999px; padding: 3px;
-}
-.chip {
-  flex: 1; border: 0; background: transparent; color: var(--primary);
-  font-size: .95rem; font-weight: 600; padding: 6px 10px; border-radius: 999px; cursor: pointer;
-}
-.chip[aria-pressed="true"] { background: var(--primary); color: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .2); }
-#date, .from-time input {
+/* ---- quando: data e ora, di default oggi e adesso */
+.when { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: flex-end; }
+.when-field { flex: 1 1 0; min-width: 0; display: grid; gap: 2px; }
+.when-field span { font-size: .78rem; color: var(--muted); padding-left: 2px; }
+.when-field input {
+  width: 100%; min-width: 0; min-height: 40px;
   font-size: .95rem; color: var(--primary); font-weight: 600;
-  background: #fff; border: 1.5px solid var(--card-border); border-radius: 8px; padding: 5px 8px; min-height: 38px;
+  background: #fff; border: 1.5px solid var(--card-border); border-radius: 8px; padding: 5px 8px;
 }
-#date { flex: 1 1 140px; min-width: 0; }
-.from-time { display: flex; align-items: center; gap: 8px; width: 100%; color: var(--muted); font-size: .9rem; }
-.from-time input { flex: 0 1 130px; }
+.when-field input:focus { border-color: var(--primary); outline: none; }
+.when-field:first-child { flex-grow: 1.25; }
+@media (max-width: 380px) {
+  .when-field input { font-size: .88rem; padding: 4px 5px; }
+  .now { padding: 0 8px; font-size: .78rem; }
+}
 .now {
-  border: 0; background: none; color: var(--primary); font-weight: 700; font-size: .85rem;
-  padding: 8px 6px; cursor: pointer; text-transform: uppercase; letter-spacing: .03em;
+  flex: none; min-height: 40px; border: 0; border-radius: 8px; cursor: pointer;
+  background: var(--primary); color: #fff; font-weight: 700; font-size: .85rem;
+  padding: 0 10px; text-transform: uppercase; letter-spacing: .02em;
 }
+.now[hidden] { display: none; }
 
 /* ---- preferiti */
 .favs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }

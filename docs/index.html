@@ -51,15 +51,15 @@
     </section>
 
     <section class="when" aria-label="Quando">
-      <div class="chips" role="group" aria-label="Giorno">
-        <button type="button" class="chip" data-day="0">Oggi</button>
-        <button type="button" class="chip" data-day="1">Domani</button>
-      </div>
-      <input type="date" id="date" aria-label="Altra data">
-      <div class="from-time">
-        <label for="time">Dalle</label> <input type="time" id="time">
-        <button type="button" id="now" class="now" hidden>Adesso</button>
-      </div>
+      <label class="when-field">
+        <span>Data</span>
+        <input type="date" id="date">
+      </label>
+      <label class="when-field">
+        <span>Dalle ore</span>
+        <input type="time" id="time">
+      </label>
+      <button type="button" id="now" class="now" hidden>Adesso</button>
     </section>
 
     <div id="favs" class="favs"></div>

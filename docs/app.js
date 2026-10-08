@@ -256,8 +256,6 @@ async function refresh() {
   $("#validity").textContent = `Orario in vigore dal ${shortDate(d.valid_from)}`;
   const src = d.source.url ? `<a href="${d.source.url}" rel="noopener">PDF ufficiale</a>` : `PDF ${d.source.file}`;
   $("#source").innerHTML = `Fonte: ${src}, elaborato il ${new Date(d.generated).toLocaleDateString("it-IT")}.`;
-  document.querySelectorAll(".chip").forEach((c) =>
-    c.setAttribute("aria-pressed", String(todayISO(+c.dataset.day) === state.date)));
   $("#date").value = state.date;
   syncTimeInput();
   renderFavs();
@@ -271,7 +269,7 @@ async function refresh() {
   const { res, info, blockedLocal, missing } = search(d, state.from, state.to, state.date);
   const h = document.createElement("h2");
   h.textContent = longDate(state.date).replace(/^./, (c) => c.toUpperCase()) +
-    (state.time === null ? `, partenze dalle ${hm(from0())} (adesso)` : `, partenze dalle ${hm(state.time)}`);
+    (state.time === null && state.date === todayISO() ? `, partenze dalle ${hm(from0())} (adesso)` : `, partenze dalle ${hm(from0())}`);
   out.append(h);
 
   if (info.warn) out.append(notice(`Attenzione: ${info.warn.nome}`, "Nei giorni di festa patronale il servizio potrebbe cambiare. Controlla gli avvisi FCE."));
@@ -379,11 +377,10 @@ async function init() {
   setupCombo("#from", "#from-list", "from");
   setupCombo("#to", "#to-list", "to");
   $("#swap").addEventListener("click", () => { [state.from, state.to] = [state.to, state.from]; syncInputs(); saveLast(); refresh(); });
-  document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
-    state.date = todayISO(+c.dataset.day); state.dateAuto = +c.dataset.day === 0; refresh();
-  }));
   $("#date").addEventListener("change", (e) => {
-    if (e.target.value) { state.date = e.target.value; state.dateAuto = e.target.value === todayISO(); refresh(); }
+    if (e.target.value) { state.date = e.target.value; state.dateAuto = e.target.value === todayISO(); }
+    else { state.date = todayISO(); state.dateAuto = true; }      // data cancellata: torna a oggi
+    refresh();
   });
   $("#time").addEventListener("change", (e) => {
     const v = e.target.value; state.time = v ? (+v.slice(0, 2)) * 60 + (+v.slice(3, 5)) : null; refresh();
