@@ -17,35 +17,35 @@
 <body>
   <header class="appbar">
     <!-- logo FCE rimosso in attesa dell'autorizzazione: il file resta in icons/logo-fce.png -->
-    <span class="appbar-title">Orari Bus <b>FCE</b></span>
-    <span class="unofficial">Non ufficiale</span>
+    <span class="appbar-title" data-i18n-html="title">Orari Bus <b>FCE</b></span>
+    <span class="unofficial" data-i18n="unofficial">Non ufficiale</span>
   </header>
 
   <div class="hello">
-    <p class="hello-small">Orario autolinee</p>
-    <p id="validity" class="validity">Carico gli orari…</p>
+    <p class="hello-small" data-i18n="subtitle">Orario autolinee</p>
+    <p id="validity" class="validity" data-i18n="loading">Carico gli orari…</p>
   </div>
 
   <div id="alert" class="alert" role="alert" hidden></div>
   <div id="banner" class="banner" hidden></div>
 
   <main>
-    <h2 class="section-title">Cerca corse</h2>
+    <h2 class="section-title" data-i18n="search">Cerca corse</h2>
     <section class="journey" aria-label="Scegli il viaggio">
       <div class="field">
-        <label for="from">Da</label>
+        <label for="from" data-i18n="from">Da</label>
         <div class="combo">
-          <input id="from" autocomplete="off" placeholder="Fermata di partenza" role="combobox" aria-expanded="false" aria-controls="from-list">
+          <input id="from" autocomplete="off" placeholder="Fermata di partenza" data-i18n-ph="phFrom" role="combobox" aria-expanded="false" aria-controls="from-list">
           <ul id="from-list" class="options" role="listbox" hidden></ul>
         </div>
       </div>
-      <button id="swap" class="swap" type="button" aria-label="Inverti partenza e arrivo" title="Inverti">
+      <button id="swap" class="swap" type="button" aria-label="Inverti partenza e arrivo" title="Inverti" data-i18n-aria="swap">
         <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M7 4v13m0 0-3-3m3 3 3-3M17 20V7m0 0-3 3m3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="field">
-        <label for="to">A</label>
+        <label for="to" data-i18n="to">A</label>
         <div class="combo">
-          <input id="to" autocomplete="off" placeholder="Fermata di arrivo" role="combobox" aria-expanded="false" aria-controls="to-list">
+          <input id="to" autocomplete="off" placeholder="Fermata di arrivo" data-i18n-ph="phTo" role="combobox" aria-expanded="false" aria-controls="to-list">
           <ul id="to-list" class="options" role="listbox" hidden></ul>
         </div>
       </div>
@@ -53,14 +53,14 @@
 
     <section class="when" aria-label="Quando">
       <label class="when-field">
-        <span>Data</span>
+        <span data-i18n="date">Data</span>
         <input type="date" id="date">
       </label>
       <label class="when-field">
-        <span>Dalle ore</span>
+        <span data-i18n="fromTime">Dalle ore</span>
         <input type="time" id="time">
       </label>
-      <button type="button" id="now" class="now" hidden>Adesso</button>
+      <button type="button" id="now" class="now" data-i18n="now" hidden>Adesso</button>
     </section>
 
     <div id="favs" class="favs"></div>
@@ -70,7 +70,7 @@
 
   <footer class="foot">
     <p id="source"></p>
-    <p>App non ufficiale, non affiliata a Ferrovia Circumetnea. I dati sono estratti automaticamente dai PDF pubblicati da FCE: in caso di dubbio fa fede l'orario ufficiale.</p>
+    <p data-i18n="disclaimer">App non ufficiale, non affiliata a Ferrovia Circumetnea. I dati sono estratti automaticamente dai PDF pubblicati da FCE: in caso di dubbio fa fede l'orario ufficiale.</p>
   </footer>
 
   <template id="trip-tpl">
@@ -86,6 +86,7 @@
     </li>
   </template>
 
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

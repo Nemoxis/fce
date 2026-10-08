@@ -1,8 +1,8 @@
 // Service worker: app utilizzabile offline.
 // Guscio dell'app: cache-first. Dati orari: rete prima, cache se offline.
-const SHELL = "fce-shell-v10";
-const DATA = "fce-data-v10";
-const FILES = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
+const SHELL = "fce-shell-v11";
+const DATA = "fce-data-v11";
+const FILES = ["./", "index.html", "style.css", "app.js", "i18n.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));

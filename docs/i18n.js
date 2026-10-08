@@ -1,0 +1,193 @@
+"use strict";
+/* Traduzioni dell'interfaccia. La lingua viene presa dalle impostazioni del telefono
+   (navigator.languages); se non e' tra queste, si usa l'inglese.
+   Per aggiungere una lingua basta copiare il blocco "en" e tradurre i testi. */
+const I18N = {
+  it: {
+    _locale: "it-IT",
+    pageTitle: "Orari Bus FCE", title: "Orari Bus <b>FCE</b>", unofficial: "Non ufficiale",
+    subtitle: "Orario autolinee", loading: "Carico gli orari…", validity: "Orario in vigore dal {d}",
+    search: "Cerca corse", from: "Da", to: "A", phFrom: "Fermata di partenza", phTo: "Fermata di arrivo",
+    swap: "Inverti partenza e arrivo", date: "Data", fromTime: "Dalle ore", now: "Adesso",
+    disclaimer: "App non ufficiale, non affiliata a Ferrovia Circumetnea. I dati sono estratti automaticamente dai PDF pubblicati da FCE: in caso di dubbio fa fede l'orario ufficiale.",
+    whySunday: "domenica", whyHoliday: "festivo", whyNoSat: "non circola il sabato", whySchool: "solo nei giorni di scuola",
+    reachGroup: "Raggiungibili con un bus diretto", otherGroup: "Altre fermate (nessun bus diretto)", remove: "Rimuovi",
+    trip: "Corsa {c}", direct: "diretta", oneStop: "1 fermata intermedia", nStops: "{n} fermate intermedie",
+    next: "Prossima", notRuns: "Non circola: {why}", school: "Scolastica", noSat: "No sabato", replacement: "Bus sostitutivo del treno",
+    noData: "Nessun orario disponibile", noDataText: "Non sono ancora stati pubblicati dati.",
+    officialPdf: "PDF ufficiale", source: "Fonte: {src}, elaborato il {d}.",
+    choose: "Scegli partenza e arrivo", chooseText: "Scrivi il nome del paese o della fermata. Puoi salvare i viaggi che fai spesso.",
+    same: "Partenza e arrivo coincidono", heading: "{date}, partenze dalle {t}", nowSuffix: " (adesso)",
+    feastTitle: "Attenzione: {name}", feastText: "Nei giorni di festa patronale il servizio potrebbe cambiare. Controlla gli avvisi FCE.",
+    missing: "Fermata non presente in questo orario", missingText: "Prova a sceglierla di nuovo dall'elenco.",
+    holiday: "Le autolinee FCE non circolano", holidayText: "Il servizio è sospeso la domenica e nei giorni festivi.",
+    noLocal: "Tratta non servita per i passeggeri locali", noLocalText: "Su questa linea FCE non effettua servizio tra queste due fermate (nota del PDF: «non si effettua servizio per salita passeggeri»).",
+    noDirect: "Nessun bus diretto tra queste fermate", noDirectText: "Potrebbe servire un cambio: prova con una fermata intermedia, ad esempio Paternò, Adrano o Catania – Metro Nesima.",
+    noneDay: "Nessuna corsa in questo giorno", noneDayText: "Ci sono corse su questa tratta, ma non circolano nel giorno scelto.",
+    showPast1: "Mostra la corsa precedente", showPastN: "Mostra le {n} corse precedenti",
+    endToday: "Per oggi le corse sono finite", endTodayText: "Guarda gli orari di domani.",
+    noneAfter: "Nessuna corsa dopo le {t}", noneAfterText: "Tocca «mostra le corse precedenti» o cambia orario.",
+    hideOff: "Nascondi le corse che non circolano", showOff: "Mostra {n} corse che in questo giorno non circolano",
+    save: "Salva questo viaggio",
+    alertTitle: "Attenzione: orari forse non aggiornati", alertWhen: " (in vigore dal {d})",
+    alertText: "FCE ha pubblicato un nuovo orario{when}, ma il controllo automatico non è riuscito a verificarlo. Gli orari mostrati qui sotto sono quelli <em>precedenti</em> e potrebbero essere sbagliati.",
+    alertLink: "Apri il PDF ufficiale FCE", alertReason: "Motivo",
+    lastCheck: "L'ultimo controllo del sito FCE risale a {n} giorni fa.",
+    offline: "Orari non disponibili offline: apri l'app una volta con la connessione attiva.",
+  },
+  en: {
+    _locale: "en-GB",
+    pageTitle: "FCE Bus Times", title: "<b>FCE</b> Bus Times", unofficial: "Unofficial",
+    subtitle: "Bus timetable", loading: "Loading timetable…", validity: "Timetable valid from {d}",
+    search: "Find a bus", from: "From", to: "To", phFrom: "Departure stop", phTo: "Arrival stop",
+    swap: "Swap departure and arrival", date: "Date", fromTime: "From", now: "Now",
+    disclaimer: "Unofficial app, not affiliated with Ferrovia Circumetnea. Times are extracted automatically from the PDFs published by FCE: if in doubt, the official timetable applies.",
+    whySunday: "Sunday", whyHoliday: "public holiday", whyNoSat: "does not run on Saturdays", whySchool: "school days only",
+    reachGroup: "Reachable with a direct bus", otherGroup: "Other stops (no direct bus)", remove: "Remove",
+    trip: "Trip {c}", direct: "non-stop", oneStop: "1 intermediate stop", nStops: "{n} intermediate stops",
+    next: "Next", notRuns: "Not running: {why}", school: "School days", noSat: "No Saturday", replacement: "Rail replacement bus",
+    noData: "No timetable available", noDataText: "No data has been published yet.",
+    officialPdf: "official PDF", source: "Source: {src}, processed on {d}.",
+    choose: "Choose departure and arrival", chooseText: "Type the name of a town or stop. You can save the trips you make often.",
+    same: "Departure and arrival are the same", heading: "{date}, departures from {t}", nowSuffix: " (now)",
+    feastTitle: "Note: {name}", feastText: "Service may change on local patron saint's days. Check FCE notices.",
+    missing: "Stop not in this timetable", missingText: "Try choosing it again from the list.",
+    holiday: "FCE buses do not run on this day", holidayText: "There is no service on Sundays and public holidays.",
+    noLocal: "Section not served for local passengers", noLocalText: "On this line FCE does not carry passengers between these two stops (timetable note: no boarding on this section).",
+    noDirect: "No direct bus between these stops", noDirectText: "You may need to change: try an intermediate stop such as Paternò, Adrano or Catania – Metro Nesima.",
+    noneDay: "No buses on this day", noneDayText: "There are buses on this route, but none run on the chosen day.",
+    showPast1: "Show the earlier bus", showPastN: "Show {n} earlier buses",
+    endToday: "No more buses today", endTodayText: "Check tomorrow's timetable.",
+    noneAfter: "No buses after {t}", noneAfterText: "Tap “show earlier buses” or change the time.",
+    hideOff: "Hide buses not running", showOff: "Show {n} buses not running on this day",
+    save: "Save this trip",
+    alertTitle: "Warning: timetable may be out of date", alertWhen: " (valid from {d})",
+    alertText: "FCE has published a new timetable{when}, but the automatic check could not verify it. The times below are from the <em>previous</em> timetable and may be wrong.",
+    alertLink: "Open the official FCE PDF", alertReason: "Reason",
+    lastCheck: "The FCE website was last checked {n} days ago.",
+    offline: "Timetable not available offline: open the app once while online.",
+  },
+  de: {
+    _locale: "de-DE",
+    pageTitle: "FCE Busfahrplan", title: "<b>FCE</b> Busfahrplan", unofficial: "Inoffiziell",
+    subtitle: "Busfahrplan", loading: "Fahrplan wird geladen…", validity: "Fahrplan gültig ab {d}",
+    search: "Verbindung suchen", from: "Von", to: "Nach", phFrom: "Abfahrtshaltestelle", phTo: "Zielhaltestelle",
+    swap: "Start und Ziel tauschen", date: "Datum", fromTime: "Ab", now: "Jetzt",
+    disclaimer: "Inoffizielle App, nicht mit Ferrovia Circumetnea verbunden. Die Zeiten werden automatisch aus den von FCE veröffentlichten PDFs gelesen: Im Zweifel gilt der offizielle Fahrplan.",
+    whySunday: "Sonntag", whyHoliday: "Feiertag", whyNoSat: "fährt nicht samstags", whySchool: "nur an Schultagen",
+    reachGroup: "Mit Direktbus erreichbar", otherGroup: "Andere Haltestellen (kein Direktbus)", remove: "Entfernen",
+    trip: "Fahrt {c}", direct: "ohne Zwischenhalt", oneStop: "1 Zwischenhalt", nStops: "{n} Zwischenhalte",
+    next: "Nächste", notRuns: "Fährt nicht: {why}", school: "Schultage", noSat: "Nicht samstags", replacement: "Schienenersatzverkehr",
+    noData: "Kein Fahrplan verfügbar", noDataText: "Es wurden noch keine Daten veröffentlicht.",
+    officialPdf: "offizielles PDF", source: "Quelle: {src}, verarbeitet am {d}.",
+    choose: "Start und Ziel wählen", chooseText: "Gib den Namen eines Ortes oder einer Haltestelle ein. Häufige Fahrten kannst du speichern.",
+    same: "Start und Ziel sind gleich", heading: "{date}, Abfahrten ab {t}", nowSuffix: " (jetzt)",
+    feastTitle: "Hinweis: {name}", feastText: "An lokalen Patronatsfesten kann sich der Betrieb ändern. Prüfe die Hinweise von FCE.",
+    missing: "Haltestelle nicht in diesem Fahrplan", missingText: "Wähle sie erneut aus der Liste.",
+    holiday: "FCE-Busse fahren an diesem Tag nicht", holidayText: "An Sonn- und Feiertagen gibt es keinen Betrieb.",
+    noLocal: "Abschnitt nicht für lokale Fahrgäste", noLocalText: "Auf dieser Linie befördert FCE keine Fahrgäste zwischen diesen beiden Haltestellen (Hinweis im Fahrplan: kein Zustieg auf diesem Abschnitt).",
+    noDirect: "Kein Direktbus zwischen diesen Haltestellen", noDirectText: "Eventuell ist ein Umstieg nötig: Probiere eine Zwischenhaltestelle wie Paternò, Adrano oder Catania – Metro Nesima.",
+    noneDay: "Keine Fahrten an diesem Tag", noneDayText: "Auf dieser Strecke gibt es Fahrten, aber keine am gewählten Tag.",
+    showPast1: "Frühere Fahrt anzeigen", showPastN: "{n} frühere Fahrten anzeigen",
+    endToday: "Heute keine Fahrten mehr", endTodayText: "Sieh dir den Fahrplan für morgen an.",
+    noneAfter: "Keine Fahrten nach {t}", noneAfterText: "Tippe auf „frühere Fahrten anzeigen“ oder ändere die Uhrzeit.",
+    hideOff: "Nicht verkehrende Fahrten ausblenden", showOff: "{n} an diesem Tag nicht verkehrende Fahrten anzeigen",
+    save: "Diese Fahrt speichern",
+    alertTitle: "Achtung: Fahrplan möglicherweise veraltet", alertWhen: " (gültig ab {d})",
+    alertText: "FCE hat einen neuen Fahrplan veröffentlicht{when}, aber die automatische Prüfung konnte ihn nicht bestätigen. Die Zeiten unten stammen aus dem <em>vorherigen</em> Fahrplan und können falsch sein.",
+    alertLink: "Offizielles FCE-PDF öffnen", alertReason: "Grund",
+    lastCheck: "Die FCE-Website wurde zuletzt vor {n} Tagen geprüft.",
+    offline: "Fahrplan offline nicht verfügbar: Öffne die App einmal mit Internetverbindung.",
+  },
+  fr: {
+    _locale: "fr-FR",
+    pageTitle: "Horaires bus FCE", title: "Horaires bus <b>FCE</b>", unofficial: "Non officiel",
+    subtitle: "Horaires des bus", loading: "Chargement des horaires…", validity: "Horaires en vigueur depuis le {d}",
+    search: "Rechercher un trajet", from: "De", to: "À", phFrom: "Arrêt de départ", phTo: "Arrêt d'arrivée",
+    swap: "Inverser départ et arrivée", date: "Date", fromTime: "À partir de", now: "Maintenant",
+    disclaimer: "Application non officielle, sans lien avec Ferrovia Circumetnea. Les horaires sont extraits automatiquement des PDF publiés par la FCE : en cas de doute, l'horaire officiel fait foi.",
+    whySunday: "dimanche", whyHoliday: "jour férié", whyNoSat: "ne circule pas le samedi", whySchool: "jours d'école uniquement",
+    reachGroup: "Accessibles en bus direct", otherGroup: "Autres arrêts (pas de bus direct)", remove: "Supprimer",
+    trip: "Course {c}", direct: "direct", oneStop: "1 arrêt intermédiaire", nStops: "{n} arrêts intermédiaires",
+    next: "Prochain", notRuns: "Ne circule pas : {why}", school: "Scolaire", noSat: "Pas le samedi", replacement: "Bus de substitution du train",
+    noData: "Aucun horaire disponible", noDataText: "Aucune donnée publiée pour l'instant.",
+    officialPdf: "PDF officiel", source: "Source : {src}, traité le {d}.",
+    choose: "Choisissez le départ et l'arrivée", chooseText: "Tapez le nom d'une ville ou d'un arrêt. Vous pouvez enregistrer vos trajets fréquents.",
+    same: "Le départ et l'arrivée sont identiques", heading: "{date}, départs à partir de {t}", nowSuffix: " (maintenant)",
+    feastTitle: "Attention : {name}", feastText: "Le service peut changer les jours de fête patronale. Consultez les avis de la FCE.",
+    missing: "Arrêt absent de cet horaire", missingText: "Essayez de le choisir à nouveau dans la liste.",
+    holiday: "Les bus FCE ne circulent pas ce jour-là", holidayText: "Pas de service le dimanche et les jours fériés.",
+    noLocal: "Tronçon non desservi pour les passagers locaux", noLocalText: "Sur cette ligne, la FCE ne transporte pas de passagers entre ces deux arrêts (note de l'horaire : pas de montée sur ce tronçon).",
+    noDirect: "Pas de bus direct entre ces arrêts", noDirectText: "Une correspondance peut être nécessaire : essayez un arrêt intermédiaire comme Paternò, Adrano ou Catania – Metro Nesima.",
+    noneDay: "Aucun bus ce jour-là", noneDayText: "Il existe des bus sur ce trajet, mais aucun ne circule le jour choisi.",
+    showPast1: "Afficher le bus précédent", showPastN: "Afficher les {n} bus précédents",
+    endToday: "Plus de bus aujourd'hui", endTodayText: "Consultez les horaires de demain.",
+    noneAfter: "Aucun bus après {t}", noneAfterText: "Touchez « afficher les bus précédents » ou changez l'heure.",
+    hideOff: "Masquer les bus qui ne circulent pas", showOff: "Afficher {n} bus qui ne circulent pas ce jour-là",
+    save: "Enregistrer ce trajet",
+    alertTitle: "Attention : horaires peut-être pas à jour", alertWhen: " (en vigueur à partir du {d})",
+    alertText: "La FCE a publié un nouvel horaire{when}, mais la vérification automatique n'a pas pu le valider. Les horaires ci-dessous sont les <em>précédents</em> et peuvent être erronés.",
+    alertLink: "Ouvrir le PDF officiel FCE", alertReason: "Motif",
+    lastCheck: "Le site de la FCE a été vérifié pour la dernière fois il y a {n} jours.",
+    offline: "Horaires indisponibles hors ligne : ouvrez l'application une fois avec une connexion.",
+  },
+  es: {
+    _locale: "es-ES",
+    pageTitle: "Horarios bus FCE", title: "Horarios bus <b>FCE</b>", unofficial: "No oficial",
+    subtitle: "Horario de autobuses", loading: "Cargando horarios…", validity: "Horario vigente desde el {d}",
+    search: "Buscar viaje", from: "De", to: "A", phFrom: "Parada de salida", phTo: "Parada de llegada",
+    swap: "Invertir salida y llegada", date: "Fecha", fromTime: "Desde las", now: "Ahora",
+    disclaimer: "Aplicación no oficial, sin relación con Ferrovia Circumetnea. Los horarios se extraen automáticamente de los PDF publicados por FCE: en caso de duda, vale el horario oficial.",
+    whySunday: "domingo", whyHoliday: "festivo", whyNoSat: "no circula los sábados", whySchool: "solo días lectivos",
+    reachGroup: "Accesibles con autobús directo", otherGroup: "Otras paradas (sin autobús directo)", remove: "Eliminar",
+    trip: "Viaje {c}", direct: "directo", oneStop: "1 parada intermedia", nStops: "{n} paradas intermedias",
+    next: "Próximo", notRuns: "No circula: {why}", school: "Escolar", noSat: "No sábados", replacement: "Autobús sustitutivo del tren",
+    noData: "Ningún horario disponible", noDataText: "Aún no se han publicado datos.",
+    officialPdf: "PDF oficial", source: "Fuente: {src}, procesado el {d}.",
+    choose: "Elige salida y llegada", chooseText: "Escribe el nombre de un pueblo o una parada. Puedes guardar los viajes que haces a menudo.",
+    same: "La salida y la llegada coinciden", heading: "{date}, salidas desde las {t}", nowSuffix: " (ahora)",
+    feastTitle: "Atención: {name}", feastText: "El servicio puede cambiar en las fiestas patronales. Consulta los avisos de FCE.",
+    missing: "Parada no incluida en este horario", missingText: "Prueba a elegirla de nuevo de la lista.",
+    holiday: "Los autobuses FCE no circulan ese día", holidayText: "No hay servicio los domingos ni los festivos.",
+    noLocal: "Tramo no servido para pasajeros locales", noLocalText: "En esta línea FCE no transporta pasajeros entre estas dos paradas (nota del horario: no se permite subir en este tramo).",
+    noDirect: "No hay autobús directo entre estas paradas", noDirectText: "Puede que necesites hacer transbordo: prueba con una parada intermedia, como Paternò, Adrano o Catania – Metro Nesima.",
+    noneDay: "Ningún autobús ese día", noneDayText: "Hay autobuses en este trayecto, pero ninguno circula el día elegido.",
+    showPast1: "Mostrar el autobús anterior", showPastN: "Mostrar los {n} autobuses anteriores",
+    endToday: "No hay más autobuses hoy", endTodayText: "Consulta los horarios de mañana.",
+    noneAfter: "Ningún autobús después de las {t}", noneAfterText: "Toca «mostrar autobuses anteriores» o cambia la hora.",
+    hideOff: "Ocultar autobuses que no circulan", showOff: "Mostrar {n} autobuses que no circulan ese día",
+    save: "Guardar este viaje",
+    alertTitle: "Atención: horarios posiblemente desactualizados", alertWhen: " (vigente desde el {d})",
+    alertText: "FCE ha publicado un nuevo horario{when}, pero la comprobación automática no ha podido verificarlo. Los horarios de abajo son los <em>anteriores</em> y podrían ser incorrectos.",
+    alertLink: "Abrir el PDF oficial de FCE", alertReason: "Motivo",
+    lastCheck: "La web de FCE se comprobó por última vez hace {n} días.",
+    offline: "Horarios no disponibles sin conexión: abre la app una vez con conexión.",
+  },
+};
+
+/* lingua del dispositivo: la prima tra quelle preferite che l'app conosce */
+const LANG = (() => {
+  const prefs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || "en"];
+  for (const p of prefs) {
+    const code = String(p).toLowerCase().split("-")[0];
+    if (I18N[code]) return code;
+  }
+  return "en";
+})();
+const LOCALE = I18N[LANG]._locale;
+
+function t(key, vars = {}) {
+  const s = (I18N[LANG][key] ?? I18N.it[key] ?? key);
+  return s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? ""));
+}
+
+/* testi fissi della pagina: elementi con data-i18n (testo), data-i18n-html,
+   data-i18n-ph (placeholder), data-i18n-aria (aria-label e title) */
+function applyStaticI18n() {
+  document.documentElement.lang = LANG;
+  document.title = t("pageTitle");
+  document.querySelectorAll("[data-i18n]").forEach((e) => { e.textContent = t(e.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach((e) => { e.innerHTML = t(e.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-ph]").forEach((e) => { e.placeholder = t(e.dataset.i18nPh); });
+  document.querySelectorAll("[data-i18n-aria]").forEach((e) => { e.setAttribute("aria-label", t(e.dataset.i18nAria)); e.title = t(e.dataset.i18nAria); });
+}

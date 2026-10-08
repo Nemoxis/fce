@@ -27,9 +27,9 @@ function syncTimeInput() {
 }
 function dateObj(iso) { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d); }
 function longDate(iso) {
-  return dateObj(iso).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  return dateObj(iso).toLocaleDateString(LOCALE, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 }
-function shortDate(iso) { return dateObj(iso).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" }); }
+function shortDate(iso) { return dateObj(iso).toLocaleDateString(LOCALE, { day: "numeric", month: "long", year: "numeric" }); }
 function duration(m) { const h = Math.floor(m / 60); return h ? `${h} h ${String(m % 60).padStart(2, "0")}` : `${m} min`; }
 
 /* ------------------------------------------------------------ calendario */
@@ -47,9 +47,9 @@ function dayInfo(iso, cal) {
   return { sunday, saturday, holiday, school, warn };
 }
 function runsOn(trip, info) {
-  if (info.holiday) return [false, info.sunday ? "domenica" : "festivo"];
-  if (trip.f.includes("nosat") && info.saturday) return [false, "non circola il sabato"];
-  if (trip.f.includes("school") && !info.school) return [false, "solo nei giorni di scuola"];
+  if (info.holiday) return [false, info.sunday ? t("whySunday") : t("whyHoliday")];
+  if (trip.f.includes("nosat") && info.saturday) return [false, t("whyNoSat")];
+  if (trip.f.includes("school") && !info.school) return [false, t("whySchool")];
   return [true, ""];
 }
 
@@ -125,11 +125,11 @@ function setupCombo(inputId, listId, which) {
     const reach = which === "to" && state.from ? reachableFrom(d, state.from) : null;
     const all = d.stops.map((s) => s)
       .filter((s) => !q || s.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q) || s.k.toLowerCase().includes(q))
-      .sort((a, b) => a.name.localeCompare(b.name, "it"));
+      .sort((a, b) => a.name.localeCompare(b.name, LOCALE));
     list.innerHTML = "";
     items = [];
-    const groups = reach ? [["Raggiungibili con un bus diretto", all.filter((s) => reach.has(s.k))],
-                           ["Altre fermate (nessun bus diretto)", all.filter((s) => !reach.has(s.k) && s.k !== state.from)]]
+    const groups = reach ? [[t("reachGroup"), all.filter((s) => reach.has(s.k))],
+                           [t("otherGroup"), all.filter((s) => !reach.has(s.k) && s.k !== state.from)]]
                          : [[null, all]];
     for (const [label, arr] of groups) {
       if (!arr.length) continue;
@@ -183,7 +183,7 @@ function renderFavs() {
     if (!a || !b) continue;
     const btn = document.createElement("button");
     btn.className = "fav"; btn.type = "button";
-    btn.innerHTML = `${short(a.name)} → ${short(b.name)}<span class="x" aria-label="Rimuovi">×</span>`;
+    btn.innerHTML = `${short(a.name)} → ${short(b.name)}<span class="x" aria-label="${t("remove")}">×</span>`;
     btn.addEventListener("click", (e) => {
       if (e.target.classList.contains("x")) {
         LS.set("fce-favs", LS.get("fce-favs", []).filter((x) => !(x.from === f.from && x.to === f.to)));
@@ -218,14 +218,14 @@ function tripItem(r, d, isNext, gone) {
   li.querySelector(".track").append(dur);
   const nStops = r.j - r.i - 1;
   li.querySelector(".meta").textContent =
-    `${r.route.name} · Corsa ${r.t.c} · ${nStops === 0 ? "diretta" : nStops === 1 ? "1 fermata intermedia" : `${nStops} fermate intermedie`}`;
+    `${r.route.name} · ${t("trip", { c: r.t.c })} · ${nStops === 0 ? t("direct") : nStops === 1 ? t("oneStop") : t("nStops", { n: nStops })}`;
   const tags = li.querySelector(".tags");
   const tag = (cls, txt) => { const s = document.createElement("span"); s.className = `tag ${cls}`; s.textContent = txt; tags.append(s); };
-  if (isNext) tag("next", "Prossima");
-  if (!r.runs) tag("off", `Non circola: ${r.why}`);
-  if (r.t.f.includes("school")) tag("school", "Scolastica");
-  if (r.t.f.includes("nosat")) tag("off", "No sabato");
-  for (const n of r.t.n) tag(n.startsWith("Bus sostitutivo") ? "sost" : "off", n);
+  if (isNext) tag("next", t("next"));
+  if (!r.runs) tag("off", t("notRuns", { why: r.why }));
+  if (r.t.f.includes("school")) tag("school", t("school"));
+  if (r.t.f.includes("nosat")) tag("off", t("noSat"));
+  for (const n of r.t.n) n.startsWith("Bus sostitutivo") ? tag("sost", t("replacement")) : tag("off", n);
 
   const btn = li.querySelector(".trip-main"), ol = li.querySelector(".stops");
   btn.addEventListener("click", () => {
@@ -251,37 +251,37 @@ async function refresh() {
   out.innerHTML = "";
   state.data = await loadDataFor(state.date);
   const d = state.data;
-  if (!d) { out.append(notice("Nessun orario disponibile", "La pipeline non ha ancora pubblicato dati.")); return; }
+  if (!d) { out.append(notice(t("noData"), t("noDataText"))); return; }
 
-  $("#validity").textContent = `Orario in vigore dal ${shortDate(d.valid_from)}`;
-  const src = d.source.url ? `<a href="${d.source.url}" rel="noopener">PDF ufficiale</a>` : `PDF ${d.source.file}`;
-  $("#source").innerHTML = `Fonte: ${src}, elaborato il ${new Date(d.generated).toLocaleDateString("it-IT")}.`;
+  $("#validity").textContent = t("validity", { d: shortDate(d.valid_from) });
+  const src = d.source.url ? `<a href="${d.source.url}" rel="noopener">${t("officialPdf")}</a>` : `PDF ${d.source.file}`;
+  $("#source").innerHTML = t("source", { src, d: new Date(d.generated).toLocaleDateString(LOCALE) });
   $("#date").value = state.date;
   syncTimeInput();
   renderFavs();
 
   if (!state.from || !state.to) {
-    out.append(notice("Scegli partenza e arrivo", "Scrivi il nome del paese o della fermata. Puoi salvare i viaggi che fai spesso."));
+    out.append(notice(t("choose"), t("chooseText")));
     return;
   }
-  if (state.from === state.to) { out.append(notice("Partenza e arrivo coincidono", "")); return; }
+  if (state.from === state.to) { out.append(notice(t("same"), "")); return; }
 
   const { res, info, blockedLocal, missing } = search(d, state.from, state.to, state.date);
   const h = document.createElement("h2");
-  h.textContent = longDate(state.date).replace(/^./, (c) => c.toUpperCase()) +
-    (state.time === null && state.date === todayISO() ? `, partenze dalle ${hm(from0())} (adesso)` : `, partenze dalle ${hm(from0())}`);
+  h.textContent = t("heading", { date: longDate(state.date).replace(/^./, (c) => c.toUpperCase()), t: hm(from0()) }) +
+    (state.time === null && state.date === todayISO() ? t("nowSuffix") : "");
   out.append(h);
 
-  if (info.warn) out.append(notice(`Attenzione: ${info.warn.nome}`, "Nei giorni di festa patronale il servizio potrebbe cambiare. Controlla gli avvisi FCE."));
-  if (missing) { out.append(notice("Fermata non presente in questo orario", "Prova a sceglierla di nuovo dall'elenco.")); return; }
+  if (info.warn) out.append(notice(t("feastTitle", { name: info.warn.nome }), t("feastText")));
+  if (missing) { out.append(notice(t("missing"), t("missingText"))); return; }
   if (info.holiday) {
-    out.append(notice("Le autolinee FCE non circolano", "Il servizio è sospeso la domenica e nei giorni festivi."));
+    out.append(notice(t("holiday"), t("holidayText")));
     return;
   }
   if (!res.length) {
     out.append(blockedLocal
-      ? notice("Tratta non servita per i passeggeri locali", "Su questa linea FCE non effettua servizio tra queste due fermate (nota del PDF: «non si effettua servizio per salita passeggeri»).")
-      : notice("Nessun bus diretto tra queste fermate", "Potrebbe servire un cambio: prova con una fermata intermedia, ad esempio Paternò, Adrano o Catania – Metro Nesima."));
+      ? notice(t("noLocal"), t("noLocalText"))
+      : notice(t("noDirect"), t("noDirectText")));
     return;
   }
 
@@ -293,11 +293,11 @@ async function refresh() {
   const past = running.filter((r) => r.dep < from);
   const upcoming = running.filter((r) => r.dep >= from);
 
-  if (!running.length) out.append(notice("Nessuna corsa in questo giorno", "Ci sono corse su questa tratta, ma non circolano nel giorno scelto."));
+  if (!running.length) out.append(notice(t("noneDay"), t("noneDayText")));
   if (past.length) {
     const more = document.createElement("button");
     more.className = "more"; more.type = "button";
-    more.textContent = `Mostra ${past.length === 1 ? "la corsa precedente" : `le ${past.length} corse precedenti`}`;
+    more.textContent = past.length === 1 ? t("showPast1") : t("showPastN", { n: past.length });
     more.addEventListener("click", () => {
       // le corse passate entrano nella stessa lista, cosi' la spaziatura e' identica
       [...past].reverse().forEach((r) => ul.prepend(tripItem(r, d, false, isToday)));
@@ -307,16 +307,16 @@ async function refresh() {
   }
   upcoming.forEach((r, k) => ul.append(tripItem(r, d, k === 0, false)));
   if (running.length && !upcoming.length) out.append(isToday && state.time === null
-    ? notice("Per oggi le corse sono finite", "Guarda gli orari di domani.")
-    : notice(`Nessuna corsa dopo le ${hm(from)}`, "Tocca «mostra le corse precedenti» o cambia orario."));
+    ? notice(t("endToday"), t("endTodayText"))
+    : notice(t("noneAfter", { t: hm(from) }), t("noneAfterText")));
   out.append(ul);
 
   if (notRunning.length) {
-    const t = document.createElement("button");
-    t.className = "more"; t.type = "button";
-    t.textContent = state.showAll ? "Nascondi le corse che non circolano" : `Mostra ${notRunning.length} corse che in questo giorno non circolano`;
-    t.addEventListener("click", () => { state.showAll = !state.showAll; refresh(); });
-    out.append(t);
+    const tg = document.createElement("button");
+    tg.className = "more"; tg.type = "button";
+    tg.textContent = state.showAll ? t("hideOff") : t("showOff", { n: notRunning.length });
+    tg.addEventListener("click", () => { state.showAll = !state.showAll; refresh(); });
+    out.append(tg);
     if (state.showAll) {
       const ul2 = document.createElement("ul"); ul2.className = "trips";
       notRunning.forEach((r) => ul2.append(tripItem(r, d, false, false)));
@@ -327,7 +327,7 @@ async function refresh() {
   const favs = LS.get("fce-favs", []);
   if (!favs.some((f) => f.from === state.from && f.to === state.to)) {
     const s = document.createElement("button"); s.className = "save-fav"; s.type = "button";
-    s.textContent = "Salva questo viaggio";
+    s.textContent = t("save");
     s.addEventListener("click", () => { favs.push({ from: state.from, to: state.to }); LS.set("fce-favs", favs); refresh(); });
     out.append(s);
   }
@@ -340,14 +340,13 @@ function showStatus() {
   const pend = (st.pending || []).map((p) => (typeof p === "string" ? { title: p } : p));
   if (pend.length) {
     const p = pend[0];
-    const when = p.valid_from ? ` (in vigore dal ${shortDate(p.valid_from)})` : "";
+    const when = p.valid_from ? t("alertWhen", { d: shortDate(p.valid_from) }) : "";
     const link = p.url || "https://www.circumetnea.it/le-nostre-linee/";
     alert.innerHTML = `
-      <strong>Attenzione: orari forse non aggiornati</strong>
-      <p>FCE ha pubblicato un nuovo orario${when}, ma il controllo automatico non è riuscito a verificarlo.
-      Gli orari mostrati qui sotto sono quelli <em>precedenti</em> e potrebbero essere sbagliati.</p>
-      <p><a href="${link}" rel="noopener">Apri il PDF ufficiale FCE</a></p>
-      ${p.reason ? `<p class="reason">Motivo: ${p.reason.replace(/</g, "&lt;")}</p>` : ""}`;
+      <strong>${t("alertTitle")}</strong>
+      <p>${t("alertText", { when })}</p>
+      <p><a href="${link}" rel="noopener">${t("alertLink")}</a></p>
+      ${p.reason ? `<p class="reason">${t("alertReason")}: ${p.reason.replace(/</g, "&lt;")}</p>` : ""}`;
     alert.hidden = false;
   } else {
     alert.hidden = true;
@@ -355,17 +354,18 @@ function showStatus() {
   const msgs = [];
   if (st.last_check) {
     const days = Math.round((dateObj(todayISO()) - dateObj(st.last_check)) / 864e5);
-    if (days >= 2) msgs.push(`L'ultimo controllo del sito FCE risale a ${days} giorni fa.`);
+    if (days >= 2) msgs.push(t("lastCheck", { n: days }));
   }
   if (msgs.length) { b.innerHTML = msgs.join("<br>"); b.hidden = false; } else b.hidden = true;
 }
 
 /* ------------------------------------------------------------ avvio */
 async function init() {
+  applyStaticI18n();
   try {
     state.index = await getJSON("data/index.json");
   } catch (e) {
-    $("#validity").textContent = "Orari non disponibili offline: apri l'app una volta con la connessione attiva.";
+    $("#validity").textContent = t("offline");
     return;
   }
   showStatus();

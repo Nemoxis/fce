@@ -86,7 +86,7 @@ button, input { font-family: inherit; }
   border: 1.5px solid var(--card-border); border-radius: var(--radius); overflow: visible;
   background: #fff;
 }
-.field { display: grid; grid-template-columns: 2em minmax(0, 1fr); align-items: center; padding-left: 12px; }
+.field { display: grid; grid-template-columns: 3.1em minmax(0, 1fr); align-items: center; padding-left: 12px; }
 .journey .field:first-child { grid-column: 1; grid-row: 1; border-bottom: 1px solid #E6E6E6; }
 .journey .field:last-child { grid-column: 1; grid-row: 2; }
 .field label { color: var(--muted); font-size: .85rem; }
@@ -106,7 +106,7 @@ button, input { font-family: inherit; }
 .swap:active { background: var(--primary-dark); }
 
 .options {
-  position: absolute; z-index: 50; left: -2em; right: -48px; top: calc(100% + 2px);
+  position: absolute; z-index: 50; left: -3.1em; right: -48px; top: calc(100% + 2px);
   margin: 0; padding: 6px 0; list-style: none; max-height: 55vh; overflow: auto;
   background: #fff; border-radius: 8px;
   box-shadow: 0 6px 24px rgb(0 0 0 / .18), 0 1px 3px rgb(0 0 0 / .12);
