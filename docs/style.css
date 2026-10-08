@@ -237,3 +237,17 @@ button, input { font-family: inherit; }
 /* voce "<paese> – tutte le fermate" e indicazione di dove salire/scendere */
 .options li.grp { font-weight: 700; color: var(--primary); }
 .where { display: block; font-size: .82rem; font-weight: 600; color: var(--primary); }
+
+/* avviso iniziale "app non ufficiale" */
+.first-note {
+  max-width: 640px; margin: 10px clamp(12px, 4vw, 20px) 0; padding: 12px 14px;
+  background: var(--news); color: var(--primary); border-radius: 14px; font-size: .88rem;
+}
+@media (min-width: 680px) { .first-note { margin-inline: auto; } }
+.first-note strong { display: block; font-size: .98rem; }
+.first-note p { margin: 4px 0 8px; color: var(--ink); }
+.first-note button {
+  border: 0; border-radius: 8px; background: var(--primary); color: #fff; font: inherit; font-weight: 700;
+  padding: 6px 14px; cursor: pointer;
+}
+.first-note[hidden] { display: none; }

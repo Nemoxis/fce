@@ -508,6 +508,11 @@ async function init() {
     return;
   }
   showStatus();
+  // avviso iniziale: app non ufficiale, nessuna responsabilita' (si chiude una volta per sempre)
+  if (!LS.get("fce-note-ok", false)) {
+    $("#first-note").hidden = false;
+    $("#first-note-ok").addEventListener("click", () => { LS.set("fce-note-ok", true); $("#first-note").hidden = true; });
+  }
   const last = LS.get("fce-last", {});
   state.from = last.from || null; state.to = last.to || null;
   state.data = await loadDataFor(state.date);
