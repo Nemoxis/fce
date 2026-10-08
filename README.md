@@ -94,7 +94,8 @@ Apri l'indirizzo GitHub Pages con **Chrome**, menu ⋮ → **Aggiungi a schermat
 - La struttura della pagina FCE e il download diretto del PDF sono stati verificati, ma la prima esecuzione da GitHub è il vero test: se il sito bloccasse i server di GitHub, lo vedrai nell'avviso dell'app e nella notifica Telegram.
 - Il PDF del 5 ottobre 2026 introduce fermate nuove (es. "Terminal Fontana", "Monte Palma"): dopo il primo aggiornamento controlla l'elenco `fermate` nel report e, se serve, unisci i doppioni in `config/aliases.yaml`.
 - Sono elaborati solo i PDF **autolinee**. Treni e metro si possono aggiungere in `config/sources.yaml`, ma il parser non è stato verificato su quei PDF.
-- Non vengono lette: la tabellina laterale "Collegamento Linguaglossa–Castiglione" della linea via A18, e alcune note scritte in verticale dentro le colonne (es. "partenza Ospedale Biancavilla"). Gli orari delle fermate in tabella sono comunque corretti.
+- Le tabelline di collegamento (es. "Collegamento Castiglione–Linguaglossa") indicano solo gli orari di partenza: l'arrivo è stimato con la durata in `config/rules.yaml` (`collegamenti`) e nell'app è mostrato con "~".
+- Non vengono lette alcune note scritte in verticale dentro le colonne (es. "partenza Ospedale Biancavilla"), né l'elenco delle sotto-fermate di Ragalna, che nel PDF non ha orari. Gli orari delle fermate in tabella sono comunque corretti.
 - Le feste patronali sono mostrate solo come avviso: i PDF FCE non dicono se il servizio cambia.
-- La ricerca trova solo **bus diretti**, senza cambi.
+- La ricerca trova i bus diretti e i viaggi con **un cambio** alla stessa fermata (minimo 3 minuti, anche immediato per le navette di collegamento, attesa massima 2 ore). Non considera cambi a piedi tra fermate diverse.
 - In caso di dubbio fa fede l'orario ufficiale FCE.

@@ -16,3 +16,13 @@ linee:
       - ["FIUMEFREDDO", "GIARRE", "RIPOSTO"]
 
 controlla_nota: "NON SI EFFETTUA SERVIZIO PER SALITA"
+
+# Collegamenti (navette) per cui il PDF indica solo gli orari di partenza,
+# es. "COLLEGAMENTO CASTIGLIONE LINGUAGLOSSA - Partenze da Castiglione".
+# L'arrivo viene stimato con questa durata e nell'app e' mostrato come "~ stimato".
+# Se conosci la durata reale, correggila qui.
+collegamenti:
+  durata_predefinita_min: 15
+  tratte:
+    - tra: ["CASTIGLIONE", "LINGUAGLOSSA"]
+      minuti: 15

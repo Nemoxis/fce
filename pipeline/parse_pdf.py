@@ -49,6 +49,7 @@ class PageResult:
     text: str
     warnings: list[str]
     notes: str = ""        # testo delle note (fuori dalle tabelle orarie o nelle colonne a destra)
+    links: list = field(default_factory=list)   # tabelline "COLLEGAMENTO" (solo orari di partenza)
 
 
 # ---------------------------------------------------------------- utilita'
@@ -370,6 +371,69 @@ def note_blocks(page, tables, keyword: str = "sabato") -> list[str]:
     return out
 
 
+LINK_TIME = re.compile(r"^(\d{1,2})[.,:](\d{2})$")
+
+
+def parse_links(page):
+    """Tabelline di collegamento: un riquadro con 'Partenze da <localita'>' seguito da un
+    elenco di orari di partenza (ed eventualmente 'Scolastica' e un codice corsa).
+    Sopra c'e' un titolo tipo 'COLLEGAMENTO CASTIGLIONE LINGUAGLOSSA'.
+    Ritorna [{header, origin, departures:[(minuti, codice, scolastica)]}]."""
+    words = [w for w in page.extract_words(extra_attrs=["upright"]) if w.get("upright", True)]
+    out = []
+    anchors = [w for w in words if w["text"].lower() == "partenze"]
+    for a in anchors:
+        da = next((w for w in words if w["text"].lower() == "da" and abs(w["top"] - a["top"]) < 3
+                   and 0 < w["x0"] - a["x1"] < 15), None)
+        if not da:
+            continue
+        x0 = a["x0"] - 18
+        below = sorted([w for w in words if w["x0"] >= x0 and w["top"] > a["top"] + 2], key=lambda w: (round(w["top"]), w["x0"]))
+        lines, cur, top = [], [], None
+        for w in below:
+            if top is None or abs(w["top"] - top) > 3:
+                if cur:
+                    lines.append(cur)
+                cur, top = [w], w["top"]
+            else:
+                cur.append(w)
+        if cur:
+            lines.append(cur)
+        origin, deps, last_y = [], [], None
+        for l in lines:
+            l = sorted(l, key=lambda w: w["x0"])
+            first = l[0]["text"]
+            m = LINK_TIME.match(first)
+            if not m:
+                if deps:
+                    break
+                if len(origin) < 2 and not any(LINK_TIME.match(w["text"]) for w in l):
+                    origin.append(" ".join(w["text"] for w in l))
+                    continue
+                break
+            if last_y is not None and l[0]["top"] - last_y > 30:
+                break
+            last_y = l[0]["top"]
+            rest = " ".join(w["text"] for w in l[1:])
+            code = re.findall(r"\b(s?\d{3,4})\b", rest)
+            deps.append((int(m.group(1)) * 60 + int(m.group(2)), code[-1] if code else "", "scolast" in rest.lower()))
+        if not deps or not origin:
+            continue
+        # titolo del riquadro: testo sopra 'Partenze', ricostruito con tolleranza larga (lettere spaziate)
+        box = (x0, max(0, a["top"] - 60), min(page.width, a["x1"] + 70), a["top"] - 1)
+        chars = [c for c in page.chars if c.get("upright", True) and box[0] <= c["x0"] and c["x1"] <= box[2]
+                 and box[1] <= c["top"] and c["bottom"] <= box[3]]
+        rows = {}
+        for c in chars:
+            rows.setdefault(round(c["top"] / 3), []).append(c)
+        head = " ".join("".join(c["text"] for c in sorted(r, key=lambda c: c["x0"])) for _, r in sorted(rows.items()))
+        head = re.sub(r"\s+", " ", head)
+        if "collegamento" not in head.lower():
+            continue  # non e' una tabellina di collegamento
+        out.append({"header": head.strip(), "origin": " ".join(origin), "departures": deps})
+    return out
+
+
 def parse_pdf(path: str) -> list[PageResult]:
     results = []
     with pdfplumber.open(path) as pdf:
@@ -389,7 +453,7 @@ def parse_pdf(path: str) -> list[PageResult]:
             notes = note_blocks(page, tables, "sabato")
             if not trips and len(re.findall(r"\d{1,2}[.,]\d{2}", text)) > 10:
                 warnings.append(f"p.{i}: ci sono orari nel testo ma nessuna tabella riconosciuta (pagina da verificare)")
-            results.append(PageResult(i, trips, legend, text, warnings, "\n".join(notes)))
+            results.append(PageResult(i, trips, legend, text, warnings, "\n".join(notes), parse_links(page)))
     return results
 
 

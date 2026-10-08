@@ -136,6 +136,7 @@ class Trip:
     school: bool = False
     no_saturday: bool = False
     notes: list[str] = field(default_factory=list)
+    estimated_arrival: bool = False         # collegamenti con solo orario di partenza
 
 
 def letter_rules(letter: str, legend: dict[str, str]) -> tuple[bool, bool, str | None]:
@@ -149,7 +150,38 @@ def letter_rules(letter: str, legend: dict[str, str]) -> tuple[bool, bool, str |
     return school, nosat, note
 
 
-def build_trips(pages: list[PageResult], reg: StopRegistry, report: dict) -> list[Trip]:
+PLACE = re.compile(r"[A-ZÀ-Ý']{4,}")
+
+
+def link_trips(p: PageResult, reg: StopRegistry, durations: dict, report: dict) -> list[Trip]:
+    """Tabelline 'COLLEGAMENTO A B / Partenze da A': corse con solo l'orario di partenza.
+    L'arrivo viene stimato con la durata in config/rules.yaml (collegamenti)."""
+    out = []
+    for L in p.links:
+        origin = L["origin"].strip()
+        places = [x for x in PLACE.findall(L["header"]) if x not in ("COLLEGAMENTO",)]
+        dests = [x for x in places if stop_key(x) != stop_key(origin)]
+        if not dests:
+            report.setdefault("warnings", []).append(f"p.{p.page}: collegamento da {origin} senza destinazione")
+            continue
+        dest = dests[0]
+        a, b = reg.resolve(origin), reg.resolve(dest)
+        minutes = durations.get(frozenset((stop_key(origin), stop_key(dest))))
+        if minutes is None:
+            minutes = durations.get("default", 15)
+            report.setdefault("warnings", []).append(
+                f"p.{p.page}: durata del collegamento {origin}-{dest} non configurata, uso {minutes} min stimati")
+        title = f"{origin.upper()} - {dest.upper()} (NAVETTA)"
+        for dep, code, school in L["departures"]:
+            t = Trip(route=title, code=code or f"{dep // 60:02d}{dep % 60:02d}", tipologia="S" if school else "",
+                     page=p.page, stops=[(a, dep, dep), (b, dep + minutes, dep + minutes)],
+                     school=school, estimated_arrival=True)
+            t.notes.append("Navetta di collegamento: arrivo stimato")
+            out.append(t)
+    return out
+
+
+def build_trips(pages: list[PageResult], reg: StopRegistry, report: dict, durations: dict | None = None) -> list[Trip]:
     global_legend: dict[str, str] = {}
     for p in pages:
         for k, v in p.legend.items():
@@ -210,4 +242,6 @@ def build_trips(pages: list[PageResult], reg: StopRegistry, report: dict) -> lis
     if unknown_letters:
         report.setdefault("warnings", []).append(
             "Lettere di tipologia senza legenda: " + ", ".join(f"{k} ({v} corse)" for k, v in unknown_letters.items()))
+    for p in pages:
+        trips += link_trips(p, reg, durations or {}, report)
     return trips

@@ -76,42 +76,95 @@ async function loadDataFor(iso) {
 }
 
 /* ------------------------------------------------------------ ricerca */
+const MIN_CHANGE = 3;        // minuti minimi per cambiare bus alla stessa fermata
+const MAX_WAIT = 120;        // attesa massima accettata al cambio
+
+function indexTrips(d) {
+  if (d._byStop) return;
+  d._byStop = {};
+  d.trips.forEach((t, ti) => t.s.forEach(([sid], pos) => { (d._byStop[sid] ||= []).push([ti, pos]); }));
+}
+function blocked(route, a, b) { return route.noLocal.some((g) => g.includes(a) && g.includes(b)); }
+function leg(d, t, i, j) { return { t, route: d.routes[t.r], i, j, dep: t.s[i][2], arr: t.s[j][1] }; }
+
 function search(d, fromK, toK, iso) {
   const A = d._stopByKey[fromK], B = d._stopByKey[toK];
   const info = dayInfo(iso, d.calendar);
   const res = [];
   let blockedLocal = 0;
   if (A === undefined || B === undefined) return { res, info, blockedLocal, missing: true };
-  d.trips.forEach((t) => {
-    const ids = t.s.map((x) => x[0]);
-    for (let j = 0; j < ids.length; j++) {
-      if (ids[j] !== B) continue;
-      const i = ids.lastIndexOf(A, j - 1);
-      if (i < 0 || j === 0) continue;
-      const route = d.routes[t.r];
-      if (route.noLocal.some((g) => g.includes(A) && g.includes(B))) { blockedLocal++; return; }
-      const [runs, why] = runsOn(t, info);
-      res.push({ t, route, i, j, dep: t.s[i][2], arr: t.s[j][1], runs, why });
-      return;
+  indexTrips(d);
+  const runs = (t) => runsOn(t, info);
+
+  // 1) corse dirette
+  for (const [ti, i] of d._byStop[A] || []) {
+    const t = d.trips[ti];
+    const j = t.s.findIndex(([sid], k) => k > i && sid === B);
+    if (j < 0) continue;
+    if (blocked(d.routes[t.r], A, B)) { blockedLocal++; continue; }
+    const [ok, why] = runs(t);
+    const l = leg(d, t, i, j);
+    res.push({ legs: [l], t, route: l.route, dep: l.dep, arr: l.arr, runs: ok, why });
+  }
+
+  // 2) un cambio alla stessa fermata (solo corse che circolano quel giorno)
+  const transfers = [];
+  for (const [t1i, i] of d._byStop[A] || []) {
+    const t1 = d.trips[t1i];
+    if (!runs(t1)[0]) continue;
+    let best = null;
+    for (let k = i + 1; k < t1.s.length; k++) {
+      const X = t1.s[k][0];
+      if (X === B || X === A || blocked(d.routes[t1.r], A, X)) continue;
+      const a1 = t1.s[k][1];
+      for (const [t2i, m] of d._byStop[X] || []) {
+        if (t2i === t1i) continue;
+        const t2 = d.trips[t2i];
+        const dep2 = t2.s[m][2], wait = dep2 - a1;
+        // le navette di collegamento sono sincronizzate con i bus: cambio anche immediato
+        const minChange = t1.f.includes("est") || t2.f.includes("est") ? 0 : MIN_CHANGE;
+        if (wait < minChange || wait > MAX_WAIT) continue;
+        const n = t2.s.findIndex(([sid], q) => q > m && sid === B);
+        if (n < 0 || blocked(d.routes[t2.r], X, B) || !runs(t2)[0]) continue;
+        const l1 = leg(d, t1, i, k), l2 = leg(d, t2, m, n);
+        if (!best || l2.arr < best.arr || (l2.arr === best.arr && l2.dep > best.legs[1].dep)) {
+          best = { legs: [l1, l2], t: t1, route: l1.route, dep: l1.dep, arr: l2.arr, runs: true, why: "", change: X, wait };
+        }
+      }
     }
-  });
-  res.sort((a, b) => a.dep - b.dep || a.arr - b.arr);
+    if (best) transfers.push(best);
+  }
+
+  // tieni solo i viaggi con cambio che convengono: nessun altro viaggio parte piu' tardi
+  // (o insieme) e arriva prima (o insieme)
+  const running = res.filter((r) => r.runs);
+  for (const tr of transfers) {
+    const dominated = [...running, ...transfers].some((o) => o !== tr &&
+      o.dep >= tr.dep && o.arr <= tr.arr && (o.legs.length < tr.legs.length || o.dep > tr.dep || o.arr < tr.arr));
+    const dup = res.some((o) => o.legs.length === 2 && o.dep === tr.dep && o.arr === tr.arr);
+    if (!dominated && !dup) res.push(tr);
+  }
+  res.sort((a, b) => a.dep - b.dep || a.arr - b.arr || a.legs.length - b.legs.length);
   return { res, info, blockedLocal };
 }
+
 function reachableFrom(d, fromK) {
   const A = d._stopByKey[fromK];
-  const out = new Set();
-  if (A === undefined) return out;
-  d.trips.forEach((t) => {
-    const ids = t.s.map((x) => x[0]);
-    const i = ids.indexOf(A);
-    if (i < 0) return;
-    const route = d.routes[t.r];
-    ids.slice(i + 1).forEach((b) => {
-      if (!route.noLocal.some((g) => g.includes(A) && g.includes(b))) out.add(d.stops[b].k);
-    });
-  });
-  return out;
+  const direct = new Set(), oneChange = new Set();
+  if (A === undefined) return { direct, oneChange };
+  indexTrips(d);
+  const hop = (S, set) => {
+    for (const [ti, i] of d._byStop[S] || []) {
+      const t = d.trips[ti], route = d.routes[t.r];
+      t.s.slice(i + 1).forEach(([b]) => { if (!blocked(route, S, b)) set.add(b); });
+    }
+  };
+  hop(A, direct);
+  for (const X of direct) hop(X, oneChange);
+  const k = (set) => new Set([...set].map((i) => d.stops[i].k));
+  const dk = k(direct), ok = k(oneChange);
+  dk.forEach((x) => ok.delete(x)); ok.delete(fromK);
+  return { direct: dk, oneChange: ok };
 }
 
 /* ------------------------------------------------------------ fermate: combobox */
@@ -128,8 +181,9 @@ function setupCombo(inputId, listId, which) {
       .sort((a, b) => a.name.localeCompare(b.name, LOCALE));
     list.innerHTML = "";
     items = [];
-    const groups = reach ? [[t("reachGroup"), all.filter((s) => reach.has(s.k))],
-                           [t("otherGroup"), all.filter((s) => !reach.has(s.k) && s.k !== state.from)]]
+    const groups = reach ? [[t("reachGroup"), all.filter((s) => reach.direct.has(s.k))],
+                           [t("changeGroup"), all.filter((s) => reach.oneChange.has(s.k))],
+                           [t("otherGroup"), all.filter((s) => !reach.direct.has(s.k) && !reach.oneChange.has(s.k) && s.k !== state.from)]]
                          : [[null, all]];
     for (const [label, arr] of groups) {
       if (!arr.length) continue;
@@ -137,7 +191,7 @@ function setupCombo(inputId, listId, which) {
       for (const s of arr) {
         const li = document.createElement("li");
         li.role = "option"; li.textContent = s.name; li.dataset.k = s.k;
-        if (reach && !reach.has(s.k)) li.classList.add("dim");
+        if (reach && !reach.direct.has(s.k) && !reach.oneChange.has(s.k)) li.classList.add("dim");
         li.addEventListener("mousedown", (e) => { e.preventDefault(); choose(s); });
         list.append(li); items.push(li);
       }
@@ -212,31 +266,59 @@ function tripItem(r, d, isNext, gone) {
   if (isNext) li.classList.add("next");
   if (gone) li.classList.add("gone");
   if (!r.runs) li.classList.add("off");
+  const last = r.legs[r.legs.length - 1];
+  const estArr = last.t.f.includes("est");
   li.querySelector(".dep").textContent = hm(r.dep);
-  li.querySelector(".arr").textContent = hm(r.arr);
+  li.querySelector(".arr").textContent = (estArr ? "~" : "") + hm(r.arr);
   const dur = document.createElement("span"); dur.className = "dur"; dur.textContent = duration(r.arr - r.dep);
   li.querySelector(".track").append(dur);
-  const nStops = r.j - r.i - 1;
-  li.querySelector(".meta").textContent =
-    `${r.route.name} · ${t("trip", { c: r.t.c })} · ${nStops === 0 ? t("direct") : nStops === 1 ? t("oneStop") : t("nStops", { n: nStops })}`;
+  if (r.legs.length > 1) li.querySelector(".track").classList.add("with-change");
+
+  const meta = li.querySelector(".meta");
+  if (r.legs.length === 1) {
+    const nStops = r.legs[0].j - r.legs[0].i - 1;
+    meta.textContent = `${r.route.name} · ${t("trip", { c: r.t.c })} · ${nStops === 0 ? t("direct") : nStops === 1 ? t("oneStop") : t("nStops", { n: nStops })}`;
+  } else {
+    meta.textContent = `${t("changeAt", { stop: d.stops[r.change].name, m: r.wait })} · ${r.legs.map((l) => l.route.name).join(" → ")}`;
+  }
+
   const tags = li.querySelector(".tags");
   const tag = (cls, txt) => { const s = document.createElement("span"); s.className = `tag ${cls}`; s.textContent = txt; tags.append(s); };
   if (isNext) tag("next", t("next"));
+  if (r.legs.length > 1) tag("change", t("oneChange"));
   if (!r.runs) tag("off", t("notRuns", { why: r.why }));
-  if (r.t.f.includes("school")) tag("school", t("school"));
-  if (r.t.f.includes("nosat")) tag("off", t("noSat"));
-  for (const n of r.t.n) n.startsWith("Bus sostitutivo") ? tag("sost", t("replacement")) : tag("off", n);
+  const allFlags = new Set(r.legs.flatMap((l) => l.t.f));
+  if (allFlags.has("school")) tag("school", t("school"));
+  if (allFlags.has("nosat")) tag("off", t("noSat"));
+  if (estArr) tag("off", t("estimated"));
+  else if (allFlags.has("est")) tag("off", t("estimatedChange"));
+  const notes = new Set(r.legs.flatMap((l) => l.t.n));
+  for (const n of notes) {
+    if (n.startsWith("Bus sostitutivo")) tag("sost", t("replacement"));
+    else if (!n.startsWith("Navetta di collegamento")) tag("off", n);
+  }
 
   const btn = li.querySelector(".trip-main"), ol = li.querySelector(".stops");
   btn.addEventListener("click", () => {
     const open = ol.hidden;
     if (open && !ol.childElementCount) {
-      r.t.s.forEach(([sid, a, dp], idx) => {
-        const s = document.createElement("li");
-        if (idx === r.i || idx === r.j) s.classList.add("here");
-        if (idx < r.i || idx > r.j) s.classList.add("outside");
-        s.innerHTML = `<time>${hm(idx === r.j ? a : dp)}</time><span>${d.stops[sid].name}</span>`;
-        ol.append(s);
+      const single = r.legs.length === 1;
+      r.legs.forEach((l, li2) => {
+        if (li2 > 0) {
+          const c = document.createElement("li"); c.className = "change";
+          c.textContent = t("changeAt", { stop: d.stops[r.change].name, m: r.wait });
+          ol.append(c);
+        }
+        const est = l.t.f.includes("est");
+        l.t.s.forEach(([sid, a, dp], idx) => {
+          if (!single && (idx < l.i || idx > l.j)) return;    // con il cambio mostro solo i tratti percorsi
+          const s = document.createElement("li");
+          if (idx === l.i || idx === l.j) s.classList.add("here");
+          if (idx < l.i || idx > l.j) s.classList.add("outside");
+          const time = hm(idx === l.j ? a : dp);
+          s.innerHTML = `<time>${est && idx > 0 ? "~" + time : time}</time><span>${d.stops[sid].name}</span>`;
+          ol.append(s);
+        });
       });
     }
     ol.hidden = !open; btn.setAttribute("aria-expanded", String(open));

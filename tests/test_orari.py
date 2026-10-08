@@ -53,13 +53,14 @@ def test_golden() -> None:
 
     pages = parse_pdf(str(GOLDEN_PDF))
     reg = StopRegistry(*load_aliases())
-    trips = build_trips(pages, reg, {})
+    from pipeline.build import load_link_durations
+    trips = build_trips(pages, reg, {}, load_link_durations())
     a18 = {t.code: t for t in trips if "A18" in t.route}
 
     def seq(code):
         return [(k, hm(dep)) for k, _, dep in a18[code].stops]
 
-    check(len(trips) == 248, f"attese 248 corse, trovate {len(trips)}")
+    check(len(trips) == 261, f"attese 261 corse (248 + 13 della navetta Castiglione), trovate {len(trips)}")
     check(len(a18) == 38, f"linea A18: attese 38 corse, trovate {len(a18)}")
     check(seq("205") == [
         ("RANDAZZO STAZIONE FCE", "07:00"), ("SOLICCHIATA", "07:20"), ("LINGUAGLOSSA STAZIONE FCE", "07:30"),
@@ -73,6 +74,14 @@ def test_golden() -> None:
     check(a18["201"].school and a18["201"].no_saturday, "corsa 201 (C/S): dovrebbe essere scolastica e sospesa il sabato")
     check(not a18["205"].school and not a18["205"].no_saturday, "corsa 205: non ha limitazioni")
     check(any("sostitutivo" in n.lower() for n in a18["TR.1"].notes), "corsa TR.1: dovrebbe essere sostitutiva treno")
+    # tabellina laterale "COLLEGAMENTO CASTIGLIONE LINGUAGLOSSA" (solo orari di partenza)
+    nav = [t for t in trips if t.estimated_arrival]
+    check(len(nav) == 13, f"navetta Castiglione-Linguaglossa: attese 13 corse, trovate {len(nav)}")
+    c401 = next((t for t in nav if t.code == "401"), None)
+    check(c401 is not None and c401.stops[0][:1] == ("CASTIGLIONE",) and c401.stops[0][2] == 6 * 60
+          and c401.stops[-1][0] == "LINGUAGLOSSA STAZIONE FCE", "corsa 401: Castiglione 06.00 -> Linguaglossa")
+    c402 = next((t for t in nav if t.code == "402"), None)
+    check(c402 is not None and c402.school and c402.stops[0][0] == "LINGUAGLOSSA STAZIONE FCE", "corsa 402: scolastica da Linguaglossa")
     belpasso = {t.code: t for t in trips if t.route.startswith("BELPASSO")}
     check(belpasso["853"].no_saturday, "corsa 853: la nota dice sospesa il sabato")
     check(not belpasso["851"].no_saturday, "corsa 851: circola anche il sabato")

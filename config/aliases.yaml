@@ -52,3 +52,7 @@ fermate:
   FIUMEFREDDO CONTRADA PONTE BORIA: { nome: "Fiumefreddo – Contrada Ponte Boria" }
   FIUMEFREDDO CENTRO: { nome: "Fiumefreddo – Centro" }
   GIARRE PARCO JUNGO: { nome: "Giarre – Parco Jungo" }
+  LINGUAGLOSSA STAZIONE FCE:
+    nome: "Linguaglossa (Stazione FCE)"
+    varianti: ["LINGUAGLOSSA"]          # navetta da/per Castiglione
+  CASTIGLIONE: { nome: "Castiglione di Sicilia" }

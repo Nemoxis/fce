@@ -6,7 +6,7 @@
   "p.2 corsa 110: cella non interpretata a 'CATANIA (S.SOFIA)': '54,41 ero a'"
  ],
  "valid_from": "2026-10-05",
- "corse_valide": 256,
+ "corse_valide": 269,
  "corse_scartate": [],
  "errori_bloccanti": [],
  "fermate": [
@@ -19,6 +19,7 @@
   "Biancavilla – Piazza Sgriccio",
   "Bronte (Stazione FCE)",
   "Camporotondo",
+  "Castiglione di Sicilia",
   "Catania – Lineri Sud (ex fermata FCE)",
   "Catania – Metro Borgo (via Etnea)",
   "Catania – Metro Fontana",

@@ -93,6 +93,14 @@ def load_aliases() -> tuple[dict, dict]:
     return aliases, display
 
 
+def load_link_durations() -> dict:
+    cfg = yaml.safe_load((CONFIG / "rules.yaml").read_text(encoding="utf-8")) or {}
+    out = {"default": (cfg.get("collegamenti") or {}).get("durata_predefinita_min", 15)}
+    for c in (cfg.get("collegamenti") or {}).get("tratte", []):
+        out[frozenset(stop_key(x) for x in c["tra"])] = int(c["minuti"])
+    return out
+
+
 def route_rules(route_title: str, stop_keys: set[str], report: dict) -> list[list[str]]:
     cfg = yaml.safe_load((CONFIG / "rules.yaml").read_text(encoding="utf-8")) or {}
     groups = []
@@ -142,7 +150,7 @@ def build(pdf_path: Path, valid_from: str | None = None, source_url: str | None 
 
     aliases, display = load_aliases()
     reg = StopRegistry(aliases=aliases, display=display)
-    trips = build_trips(pages, reg, report)
+    trips = build_trips(pages, reg, report, load_link_durations())
     trips, ok = validate(trips, previous_count, report)
 
     note_cfg = yaml.safe_load((CONFIG / "rules.yaml").read_text(encoding="utf-8")).get("controlla_nota")
@@ -164,7 +172,7 @@ def build(pdf_path: Path, valid_from: str | None = None, source_url: str | None 
                 stop_index[k] = len(stops_out)
                 stops_out.append({"k": k, "name": reg.name_of(k), "code": reg.codes.get(k)})
             seq.append([stop_index[k], arr, dep])
-        flags = (["school"] if t.school else []) + (["nosat"] if t.no_saturday else [])
+        flags = (["school"] if t.school else []) + (["nosat"] if t.no_saturday else []) + (["est"] if t.estimated_arrival else [])
         trips_out.append({"r": route_index[t.route], "c": t.code, "t": t.tipologia, "p": t.page,
                           "f": flags, "n": t.notes, "s": seq})
 
