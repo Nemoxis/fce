@@ -5,6 +5,7 @@
 const I18N = {
   it: {
     _locale: "it-IT",
+    allStops: "{town} – tutte le fermate",
     changeGroup: "Raggiungibili con un cambio", changeAt: "Cambio a {stop} (attesa {m} min)", oneChange: "1 cambio", estimated: "Arrivo stimato", estimatedChange: "Coincidenza stimata",
     pageTitle: "Orari Bus FCE", title: "Orari Bus <b>FCE</b>", unofficial: "Non ufficiale",
     subtitle: "Orario autolinee", loading: "Carico gli orari…", validity: "Orario in vigore dal {d}",
@@ -38,6 +39,7 @@ const I18N = {
   },
   en: {
     _locale: "en-GB",
+    allStops: "{town} – all stops",
     changeGroup: "Reachable with one change", changeAt: "Change at {stop} ({m} min wait)", oneChange: "1 change", estimated: "Estimated arrival", estimatedChange: "Estimated connection",
     pageTitle: "FCE Bus Times", title: "<b>FCE</b> Bus Times", unofficial: "Unofficial",
     subtitle: "Bus timetable", loading: "Loading timetable…", validity: "Timetable valid from {d}",
@@ -71,6 +73,7 @@ const I18N = {
   },
   de: {
     _locale: "de-DE",
+    allStops: "{town} – alle Haltestellen",
     changeGroup: "Mit einem Umstieg erreichbar", changeAt: "Umstieg in {stop} ({m} Min. Wartezeit)", oneChange: "1 Umstieg", estimated: "Ankunft geschätzt", estimatedChange: "Anschluss geschätzt",
     pageTitle: "FCE Busfahrplan", title: "<b>FCE</b> Busfahrplan", unofficial: "Inoffiziell",
     subtitle: "Busfahrplan", loading: "Fahrplan wird geladen…", validity: "Fahrplan gültig ab {d}",
@@ -104,6 +107,7 @@ const I18N = {
   },
   fr: {
     _locale: "fr-FR",
+    allStops: "{town} – tous les arrêts",
     changeGroup: "Accessibles avec une correspondance", changeAt: "Correspondance à {stop} ({m} min d'attente)", oneChange: "1 correspondance", estimated: "Arrivée estimée", estimatedChange: "Correspondance estimée",
     pageTitle: "Horaires bus FCE", title: "Horaires bus <b>FCE</b>", unofficial: "Non officiel",
     subtitle: "Horaires des bus", loading: "Chargement des horaires…", validity: "Horaires en vigueur depuis le {d}",
@@ -137,6 +141,7 @@ const I18N = {
   },
   es: {
     _locale: "es-ES",
+    allStops: "{town} – todas las paradas",
     changeGroup: "Accesibles con un transbordo", changeAt: "Transbordo en {stop} ({m} min de espera)", oneChange: "1 transbordo", estimated: "Llegada estimada", estimatedChange: "Conexión estimada",
     pageTitle: "Horarios bus FCE", title: "Horarios bus <b>FCE</b>", unofficial: "No oficial",
     subtitle: "Horario de autobuses", loading: "Cargando horarios…", validity: "Horario vigente desde el {d}",

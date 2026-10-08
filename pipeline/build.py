@@ -79,6 +79,20 @@ def build_calendar(years: list[int]) -> dict:
     }
 
 
+def load_towns() -> list[tuple[str, str]]:
+    path = CONFIG / "aliases.yaml"
+    cfg = yaml.safe_load(path.read_text(encoding="utf-8")) or {} if path.exists() else {}
+    rules = [(stop_key(k), v) for k, v in (cfg.get("comuni") or {}).items()]
+    return sorted(rules, key=lambda r: -len(r[0]))
+
+
+def town_of(key: str, name: str, rules: list[tuple[str, str]]) -> str:
+    for prefix, town in rules:
+        if key.startswith(prefix):
+            return town
+    return re.split(r" – | \(", name)[0].strip()
+
+
 def load_aliases() -> tuple[dict, dict]:
     path = CONFIG / "aliases.yaml"
     if not path.exists():
@@ -185,6 +199,10 @@ def build(pdf_path: Path, valid_from: str | None = None, source_url: str | None 
                 for title in titles:
                     if title in route_index and not routes_out[route_index[title]]["noLocal"]:
                         report["warnings"].append(f"p.{p.page}: nota '{note_cfg}' presente ma nessuna regola in config/rules.yaml per '{title}'")
+
+    towns = load_towns()
+    for st in stops_out:
+        st["t"] = town_of(st["k"], st["name"], towns)
 
     sha = hashlib.sha256(pdf_path.read_bytes()).hexdigest()
     years = sorted({int(vf[:4]), int(vf[:4]) + 1})

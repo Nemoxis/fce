@@ -72,12 +72,40 @@ async function loadDataFor(iso) {
   const d = state.cache[v.file];
   d._version = v;
   d._stopByKey = Object.fromEntries(d.stops.map((s, i) => [s.k, i]));
+  // paesi con piu' fermate -> voce "<paese> – tutte le fermate" (chiave "@paese")
+  if (!d._groups) {
+    const byTown = {};
+    d.stops.forEach((s, i) => { const tw = s.t || s.name; (byTown[tw] ||= []).push(i); });
+    d._groups = {};
+    for (const [town, ids] of Object.entries(byTown)) {
+      if (ids.length > 1) d._groups["@" + town] = { k: "@" + town, town, ids: new Set(ids), group: true };
+    }
+  }
   return d;
+}
+
+/* ------------------------------------------------------------ luoghi: fermata singola o paese intero */
+function isGroup(k) { return typeof k === "string" && k.startsWith("@"); }
+function placeIds(d, k) {
+  if (isGroup(k)) return d._groups[k]?.ids;
+  const i = d._stopByKey[k];
+  return i === undefined ? undefined : new Set([i]);
+}
+function placeName(d, k) {
+  if (!k) return "";
+  if (isGroup(k)) return d._groups[k] ? t("allStops", { town: d._groups[k].town }) : "";
+  return d.stops[d._stopByKey[k]]?.name || "";
+}
+function placeList(d) {
+  const groups = Object.values(d._groups).map((g) => ({ k: g.k, name: t("allStops", { town: g.town }), town: g.town, group: true }));
+  const stops = d.stops.map((s) => ({ k: s.k, name: s.name, town: s.t || s.name, group: false }));
+  return [...groups, ...stops].sort((a, b) => a.town.localeCompare(b.town, LOCALE) || (b.group - a.group) || a.name.localeCompare(b.name, LOCALE));
 }
 
 /* ------------------------------------------------------------ ricerca */
 const MIN_CHANGE = 3;        // minuti minimi per cambiare bus alla stessa fermata
-const MAX_WAIT = 120;        // attesa massima accettata al cambio
+const MAX_WAIT = 90;         // attesa massima accettata al cambio
+const MAX_TOTAL = 180;       // durata massima di un viaggio con cambio (evita giri assurdi)
 
 function indexTrips(d) {
   if (d._byStop) return;
@@ -88,52 +116,62 @@ function blocked(route, a, b) { return route.noLocal.some((g) => g.includes(a) &
 function leg(d, t, i, j) { return { t, route: d.routes[t.r], i, j, dep: t.s[i][2], arr: t.s[j][1] }; }
 
 function search(d, fromK, toK, iso) {
-  const A = d._stopByKey[fromK], B = d._stopByKey[toK];
   const info = dayInfo(iso, d.calendar);
   const res = [];
   let blockedLocal = 0;
-  if (A === undefined || B === undefined) return { res, info, blockedLocal, missing: true };
+  let SA = placeIds(d, fromK), SB = placeIds(d, toK);
+  if (!SA || !SB) return { res, info, blockedLocal, missing: true };
+  SA = new Set([...SA].filter((x) => !SB.has(x)));          // es. "Catania (tutte)" -> "Catania Borgo"
+  if (!SA.size) return { res, info, blockedLocal, same: true };
   indexTrips(d);
   const runs = (t) => runsOn(t, info);
 
-  // 1) corse dirette
-  for (const [ti, i] of d._byStop[A] || []) {
-    const t = d.trips[ti];
-    const j = t.s.findIndex(([sid], k) => k > i && sid === B);
-    if (j < 0) continue;
-    if (blocked(d.routes[t.r], A, B)) { blockedLocal++; continue; }
+  // 1) corse dirette: si sale alla prima fermata di partenza, si scende alla prima di arrivo
+  d.trips.forEach((t) => {
+    const i = t.s.findIndex(([sid]) => SA.has(sid));
+    if (i < 0) return;
+    const j = t.s.findIndex(([sid], k) => k > i && SB.has(sid));
+    if (j < 0) return;
+    if (blocked(d.routes[t.r], t.s[i][0], t.s[j][0])) { blockedLocal++; return; }
     const [ok, why] = runs(t);
     const l = leg(d, t, i, j);
     res.push({ legs: [l], t, route: l.route, dep: l.dep, arr: l.arr, runs: ok, why });
-  }
+  });
 
   // 2) un cambio alla stessa fermata (solo corse che circolano quel giorno)
   const transfers = [];
-  for (const [t1i, i] of d._byStop[A] || []) {
-    const t1 = d.trips[t1i];
-    if (!runs(t1)[0]) continue;
+  d.trips.forEach((t1, t1i) => {
+    if (!runs(t1)[0]) return;
+    const i = t1.s.findIndex(([sid]) => SA.has(sid));
+    if (i < 0) return;
+    const A = t1.s[i][0];
     let best = null;
     for (let k = i + 1; k < t1.s.length; k++) {
       const X = t1.s[k][0];
-      if (X === B || X === A || blocked(d.routes[t1.r], A, X)) continue;
+      if (SA.has(X) || SB.has(X) || blocked(d.routes[t1.r], A, X)) continue;
       const a1 = t1.s[k][1];
       for (const [t2i, m] of d._byStop[X] || []) {
         if (t2i === t1i) continue;
         const t2 = d.trips[t2i];
+        if (t2.r === t1.r) continue;          // stessa linea: il cambio servirebbe solo a tornare indietro
         const dep2 = t2.s[m][2], wait = dep2 - a1;
         // le navette di collegamento sono sincronizzate con i bus: cambio anche immediato
         const minChange = t1.f.includes("est") || t2.f.includes("est") ? 0 : MIN_CHANGE;
         if (wait < minChange || wait > MAX_WAIT) continue;
-        const n = t2.s.findIndex(([sid], q) => q > m && sid === B);
-        if (n < 0 || blocked(d.routes[t2.r], X, B) || !runs(t2)[0]) continue;
+        const n = t2.s.findIndex(([sid], q) => q > m && SB.has(sid));
+        if (n < 0 || blocked(d.routes[t2.r], X, t2.s[n][0]) || !runs(t2)[0]) continue;
+        // niente percorsi "avanti e indietro": il secondo bus non deve ripassare da fermate gia' percorse
+        const seen = new Set(t1.s.slice(i, k).map(([sid]) => sid));
+        if (t2.s.slice(m + 1, n + 1).some(([sid]) => seen.has(sid))) continue;
         const l1 = leg(d, t1, i, k), l2 = leg(d, t2, m, n);
+        if (l2.arr - l1.dep > MAX_TOTAL) continue;
         if (!best || l2.arr < best.arr || (l2.arr === best.arr && l2.dep > best.legs[1].dep)) {
           best = { legs: [l1, l2], t: t1, route: l1.route, dep: l1.dep, arr: l2.arr, runs: true, why: "", change: X, wait };
         }
       }
     }
     if (best) transfers.push(best);
-  }
+  });
 
   // tieni solo i viaggi con cambio che convengono: nessun altro viaggio parte piu' tardi
   // (o insieme) e arriva prima (o insieme)
@@ -149,9 +187,9 @@ function search(d, fromK, toK, iso) {
 }
 
 function reachableFrom(d, fromK) {
-  const A = d._stopByKey[fromK];
+  const SA = placeIds(d, fromK);
   const direct = new Set(), oneChange = new Set();
-  if (A === undefined) return { direct, oneChange };
+  if (!SA) return { direct, oneChange };
   indexTrips(d);
   const hop = (S, set) => {
     for (const [ti, i] of d._byStop[S] || []) {
@@ -159,26 +197,33 @@ function reachableFrom(d, fromK) {
       t.s.slice(i + 1).forEach(([b]) => { if (!blocked(route, S, b)) set.add(b); });
     }
   };
-  hop(A, direct);
+  SA.forEach((a) => hop(a, direct));
   for (const X of direct) hop(X, oneChange);
-  const k = (set) => new Set([...set].map((i) => d.stops[i].k));
-  const dk = k(direct), ok = k(oneChange);
-  dk.forEach((x) => ok.delete(x)); ok.delete(fromK);
+  direct.forEach((x) => oneChange.delete(x));
+  SA.forEach((x) => { direct.delete(x); oneChange.delete(x); });
+  // un paese e' raggiungibile se lo e' almeno una sua fermata
+  const keys = (set) => {
+    const out = new Set([...set].map((i) => d.stops[i].k));
+    for (const g of Object.values(d._groups)) if ([...g.ids].some((i) => set.has(i))) out.add(g.k);
+    return out;
+  };
+  const dk = keys(direct), ok = keys(oneChange);
+  dk.forEach((x) => ok.delete(x));
   return { direct: dk, oneChange: ok };
 }
 
 /* ------------------------------------------------------------ fermate: combobox */
 function setupCombo(inputId, listId, which) {
   const input = $(inputId), list = $(listId);
-  let items = [], active = -1;
+  let items = [], active = -1, itemByKey = {};
 
   function render() {
     const d = state.data; if (!d) return;
     const q = input.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const reach = which === "to" && state.from ? reachableFrom(d, state.from) : null;
-    const all = d.stops.map((s) => s)
-      .filter((s) => !q || s.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q) || s.k.toLowerCase().includes(q))
-      .sort((a, b) => a.name.localeCompare(b.name, LOCALE));
+    const norm = (x) => x.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const all = placeList(d).filter((s) => !q || norm(s.name).includes(q) || norm(s.town).includes(q) || s.k.toLowerCase().includes(q));
+    itemByKey = Object.fromEntries(all.map((s) => [s.k, s]));
     list.innerHTML = "";
     items = [];
     const groups = reach ? [[t("reachGroup"), all.filter((s) => reach.direct.has(s.k))],
@@ -191,6 +236,7 @@ function setupCombo(inputId, listId, which) {
       for (const s of arr) {
         const li = document.createElement("li");
         li.role = "option"; li.textContent = s.name; li.dataset.k = s.k;
+        if (s.group) li.classList.add("grp");
         if (reach && !reach.direct.has(s.k) && !reach.oneChange.has(s.k)) li.classList.add("dim");
         li.addEventListener("mousedown", (e) => { e.preventDefault(); choose(s); });
         list.append(li); items.push(li);
@@ -210,7 +256,7 @@ function setupCombo(inputId, listId, which) {
   input.addEventListener("blur", () => setTimeout(() => {
     close();
     const d = state.data; const k = state[which];
-    if (d && k !== null) input.value = d.stops[d._stopByKey[k]]?.name || input.value;
+    if (d && k !== null) input.value = placeName(d, k) || input.value;
   }, 120));
   input.addEventListener("keydown", (e) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -220,7 +266,7 @@ function setupCombo(inputId, listId, which) {
       items[active]?.scrollIntoView({ block: "nearest" });
     } else if (e.key === "Enter") {
       const li = items[active] || items[0];
-      if (li) { const d = state.data; choose(d.stops[d._stopByKey[li.dataset.k]]); }
+      if (li) choose(itemByKey[li.dataset.k]);
     } else if (e.key === "Escape") close();
   });
 }
@@ -233,8 +279,8 @@ function renderFavs() {
   const box = $("#favs"); box.innerHTML = "";
   const d = state.data; if (!d) return;
   for (const f of LS.get("fce-favs", [])) {
-    const a = d.stops[d._stopByKey[f.from]], b = d.stops[d._stopByKey[f.to]];
-    if (!a || !b) continue;
+    const a = { name: placeName(d, f.from) }, b = { name: placeName(d, f.to) };
+    if (!a.name || !b.name) continue;
     const btn = document.createElement("button");
     btn.className = "fav"; btn.type = "button";
     btn.innerHTML = `${short(a.name)} → ${short(b.name)}<span class="x" aria-label="${t("remove")}">×</span>`;
@@ -253,8 +299,8 @@ function short(n) { return n.replace(/^Catania – /, "").replace(/ \(.*\)$/, ""
 /* ------------------------------------------------------------ rendering */
 function syncInputs() {
   const d = state.data;
-  $("#from").value = state.from && d ? (d.stops[d._stopByKey[state.from]]?.name || "") : "";
-  $("#to").value = state.to && d ? (d.stops[d._stopByKey[state.to]]?.name || "") : "";
+  $("#from").value = state.from && d ? placeName(d, state.from) : "";
+  $("#to").value = state.to && d ? placeName(d, state.to) : "";
 }
 function notice(title, text) {
   const n = document.createElement("div"); n.className = "notice";
@@ -275,6 +321,12 @@ function tripItem(r, d, isNext, gone) {
   if (r.legs.length > 1) li.querySelector(".track").classList.add("with-change");
 
   const meta = li.querySelector(".meta");
+  if (isGroup(state.from) || isGroup(state.to)) {
+    const where = document.createElement("span"); where.className = "where";
+    const first = r.legs[0], lastL = r.legs[r.legs.length - 1];
+    where.textContent = `${d.stops[first.t.s[first.i][0]].name} → ${d.stops[lastL.t.s[lastL.j][0]].name}`;
+    meta.dataset.where = where.textContent;
+  }
   if (r.legs.length === 1) {
     const nStops = r.legs[0].j - r.legs[0].i - 1;
     meta.textContent = `${r.route.name} · ${t("trip", { c: r.t.c })} · ${nStops === 0 ? t("direct") : nStops === 1 ? t("oneStop") : t("nStops", { n: nStops })}`;
@@ -282,6 +334,10 @@ function tripItem(r, d, isNext, gone) {
     meta.textContent = `${t("changeAt", { stop: d.stops[r.change].name, m: r.wait })} · ${r.legs.map((l) => l.route.name).join(" → ")}`;
   }
 
+  if (meta.dataset.where) {
+    const w = document.createElement("span"); w.className = "where"; w.textContent = meta.dataset.where;
+    meta.prepend(w);
+  }
   const tags = li.querySelector(".tags");
   const tag = (cls, txt) => { const s = document.createElement("span"); s.className = `tag ${cls}`; s.textContent = txt; tags.append(s); };
   if (isNext) tag("next", t("next"));
@@ -348,7 +404,8 @@ async function refresh() {
   }
   if (state.from === state.to) { out.append(notice(t("same"), "")); return; }
 
-  const { res, info, blockedLocal, missing } = search(d, state.from, state.to, state.date);
+  const { res, info, blockedLocal, missing, same } = search(d, state.from, state.to, state.date);
+  if (same) { out.append(notice(t("same"), "")); return; }
   const h = document.createElement("h2");
   h.textContent = t("heading", { date: longDate(state.date).replace(/^./, (c) => c.toUpperCase()), t: hm(from0()) }) +
     (state.time === null && state.date === todayISO() ? t("nowSuffix") : "");

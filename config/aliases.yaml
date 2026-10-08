@@ -56,3 +56,10 @@ fermate:
     nome: "Linguaglossa (Stazione FCE)"
     varianti: ["LINGUAGLOSSA"]          # navetta da/per Castiglione
   CASTIGLIONE: { nome: "Castiglione di Sicilia" }
+
+# Paese di ogni fermata, usato per la voce "<Paese> – tutte le fermate".
+# Di norma si ricava dal nome ("Catania – Metro Borgo" -> Catania, "Paternò (…)" -> Paternò).
+# Qui le eccezioni: inizio della chiave fermata -> paese.
+comuni:
+  ADRANO NORD: Adrano
+  LINERI: Lineri

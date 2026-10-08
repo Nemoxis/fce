@@ -233,3 +233,7 @@ button, input { font-family: inherit; }
 }
 .stops li.change::before { display: none; }
 .track.with-change .rail { border-top-style: dashed; }
+
+/* voce "<paese> – tutte le fermate" e indicazione di dove salire/scendere */
+.options li.grp { font-weight: 700; color: var(--primary); }
+.where { display: block; font-size: .82rem; font-weight: 600; color: var(--primary); }

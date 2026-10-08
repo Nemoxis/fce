@@ -34,6 +34,7 @@ def test_published() -> None:
         d = json.loads((DATA / v["file"]).read_text(encoding="utf-8"))
         check(len(d["trips"]) == v["trips"], f"{v['file']}: numero corse diverso dall'indice")
         ns, nr = len(d["stops"]), len(d["routes"])
+        check(all(st.get("t") for st in d["stops"]), f"{v['file']}: fermate senza paese (campo t)")
         for t in d["trips"]:
             check(0 <= t["r"] < nr, f"{v['file']} corsa {t['c']}: linea inesistente")
             prev = -1

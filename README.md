@@ -77,6 +77,8 @@ Riceverai un messaggio quando un nuovo orario viene pubblicato, quando un PDF no
 - L'ora di partenza predefinita è **quella attuale**: la lista mostra i bus da adesso in poi e si aggiorna da sola ogni minuto. Se cambi l'orario, compare il pulsante **Adesso** per tornare all'ora corrente.
 - Quando riapri l'app (anche il giorno dopo) riparte da oggi e da adesso, e controlla se sono stati pubblicati orari nuovi.
 - Se FCE pubblica un orario con data futura, l'app usa automaticamente quello giusto per il giorno scelto.
+- Per i paesi con più fermate c'è la voce **"<Paese> – tutte le fermate"** (es. "Catania – tutte le fermate"): come arrivo vale la prima fermata del paese raggiunta dal bus, come partenza la prima in cui passa. Il paese di ogni fermata si ricava dal nome; le eccezioni sono in `config/aliases.yaml` (sezione `comuni`).
+- Se non c'è un bus diretto, o con un cambio si arriva prima, l'app propone viaggi con **un cambio**. Non propone cambi tra due corse della stessa linea, attese oltre 90 minuti o viaggi oltre 3 ore.
 
 ## Installare l'app su Android
 
@@ -97,5 +99,5 @@ Apri l'indirizzo GitHub Pages con **Chrome**, menu ⋮ → **Aggiungi a schermat
 - Le tabelline di collegamento (es. "Collegamento Castiglione–Linguaglossa") indicano solo gli orari di partenza: l'arrivo è stimato con la durata in `config/rules.yaml` (`collegamenti`) e nell'app è mostrato con "~".
 - Non vengono lette alcune note scritte in verticale dentro le colonne (es. "partenza Ospedale Biancavilla"), né l'elenco delle sotto-fermate di Ragalna, che nel PDF non ha orari. Gli orari delle fermate in tabella sono comunque corretti.
 - Le feste patronali sono mostrate solo come avviso: i PDF FCE non dicono se il servizio cambia.
-- La ricerca trova i bus diretti e i viaggi con **un cambio** alla stessa fermata (minimo 3 minuti, anche immediato per le navette di collegamento, attesa massima 2 ore). Non considera cambi a piedi tra fermate diverse.
+- La ricerca trova i bus diretti e i viaggi con **un cambio** alla stessa fermata (minimo 3 minuti, anche immediato per le navette di collegamento, attesa massima 90 minuti, viaggio massimo 3 ore). Non considera cambi a piedi tra fermate diverse.
 - In caso di dubbio fa fede l'orario ufficiale FCE.
