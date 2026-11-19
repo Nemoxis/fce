@@ -26,6 +26,17 @@
    "reason": "",
    "processed": "2026-10-03T22:58",
    "verified": "2026-10-05"
+  },
+  "18445": {
+   "title": "ORARIO AUTOLINEE IN VIGORE DAL 23 NOVEMBRE 2026",
+   "category": "autolinee",
+   "sha256": "d5a8456f12a1d9f56d36cbe91141b78b59cfd8800e32902be24a44fa9c09dd21",
+   "valid_from": "2026-10-05",
+   "status": "ok",
+   "url": "https://www.circumetnea.it/download/orario-autolinee-in-vigore-dal-23-novembre-2026/?wpdmdl=18445&refresh=6afef4622651d1795093602",
+   "reason": "",
+   "processed": "2026-11-19T13:26",
+   "verified": "2026-11-19"
   }
  },
  "last_errors": []

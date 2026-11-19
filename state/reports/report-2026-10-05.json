@@ -1,9 +1,13 @@
 {
- "pdf": "autolinee-2026-10-05.pdf",
+ "pdf": "autolinee-2026-11-23.pdf",
  "warnings": [
   "p.1 corsa 105: orario '7,3' interpretato come 7:30",
+  "p.2 corsa BisT1208: orario '55,3' interpretato come 55:30",
+  "p.2 corsa BisT1208: cella non interpretata a 'CATANIA (METRO MILO)': '5 5 ,3'",
+  "p.2 corsa BIS1208: cella non interpretata a 'CATANIA (Via Etnea) METRO BORGO': '5 5 ,3 1 e'",
   "p.2 corsa 108: cella non interpretata a 'CATANIA (S.SOFIA)': '01,41 ero a'",
-  "p.2 corsa 110: cella non interpretata a 'CATANIA (S.SOFIA)': '54,41 ero a'"
+  "p.2 corsa 110: cella non interpretata a 'CATANIA (S.SOFIA)': '54,41 ero a'",
+  "Lettere di tipologia senza legenda: K (4 corse), Q (4 corse)"
  ],
  "valid_from": "2026-10-05",
  "corse_valide": 269,
@@ -65,6 +69,7 @@
   "Santa Maria di Licodia",
   "Santa Maria di Licodia – Licodia Sud (stazione FCE)",
   "Solicchiata",
+  "Terminal Metro Fontata",
   "Valcorrente (Etnapolis)"
  ],
  "ok": true

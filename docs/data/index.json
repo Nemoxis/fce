@@ -16,11 +16,11 @@
    "file": "orario-2026-10-05.json",
    "trips": 269,
    "source": {
-    "file": "autolinee-2026-10-05.pdf",
-    "url": null,
-    "sha256": "2d0afd6919861156c421108f588efdba6c84d3a1271cb824ba19d3a3cf28d9df"
+    "file": "autolinee-2026-11-23.pdf",
+    "url": "https://www.circumetnea.it/download/orario-autolinee-in-vigore-dal-23-novembre-2026/?wpdmdl=18445&refresh=6afef4622651d1795093602",
+    "sha256": "d5a8456f12a1d9f56d36cbe91141b78b59cfd8800e32902be24a44fa9c09dd21"
    },
-   "generated": "2026-10-08T12:13:51+00:00"
+   "generated": "2026-11-19T13:26:24+00:00"
   }
  ],
  "status": {
