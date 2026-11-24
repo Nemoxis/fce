@@ -220,7 +220,9 @@ def run(force: bool = False) -> int:
         ARCHIVE.mkdir(exist_ok=True)
         path = ARCHIVE / f"{cat}-{vf or pkg['id']}.pdf"
         path.write_bytes(pdf)
-        rep = process_pdf(path, None, pkg["links"][0], pkg["title"])
+        # la data "in vigore dal" del titolo sul sito e' quella affidabile: FCE a volte
+        # ripubblica il PDF lasciando dentro la data del vecchio orario
+        rep = process_pdf(path, vf, pkg["links"][0], pkg["title"])
         st["packages"][pkg["id"]] = {"title": pkg["title"], "category": cat, "sha256": sha,
                                      "valid_from": rep.get("valid_from") or vf, "status": "ok" if rep["ok"] else "failed",
                                      "url": pkg["links"][0], "reason": "; ".join(rep.get("errori_bloccanti") or []),

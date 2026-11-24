@@ -13,7 +13,7 @@ sito FCE ──► pipeline/update.py ──► pipeline/parse_pdf.py ──► 
 - **Parser generico**: non contiene regole per singole linee. Ricostruisce la griglia delle tabelle dai bordi del PDF e gestisce celle unite, doppi orari arrivo/partenza (es. `06.19 / 06.20`), le `x` di transito, le note scritte in verticale e i refusi come `7,3`.
 - **Regole dei giorni** lette dal PDF: corse scolastiche (`S`, `*`), sospese il sabato (`C`, note tipo "le corse 354 - 356 sono sospese il sabato"), bus sostitutivi del treno, servizio sospeso domenica e festivi.
 - **Sicurezza**: se un nuovo PDF non supera i controlli, i dati vecchi restano pubblicati, l'app mostra un avviso e ricevi una notifica.
-- **Versioni**: se FCE pubblica un orario in anticipo ("in vigore dal 5 ottobre"), l'app passa al nuovo orario da sola in quella data.
+- **Versioni**: se FCE pubblica un orario in anticipo ("in vigore dal 5 ottobre"), l'app passa al nuovo orario da sola in quella data. La data "in vigore dal" si prende dal titolo del download sul sito FCE, perché a volte FCE ripubblica il PDF lasciando dentro la data del vecchio orario (è successo con l'orario del 23 novembre 2026); in quel caso il report lo segnala.
 
 ## Struttura
 

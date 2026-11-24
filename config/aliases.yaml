@@ -13,7 +13,7 @@ fermate:
   METRO NESIMA:      { nome: "Catania – Metro Nesima" }
   METRO FONTANA:
     nome: "Catania – Metro Fontana"
-    varianti: ["TERMINAL FONTANA", "Metro Fontana (terminal bus)"]
+    varianti: ["TERMINAL FONTANA", "Metro Fontana (terminal bus)", "TERMINAL METRO FONTATA", "METRO FONTATA"]   # "Fontata": refuso nel PDF del 23/11/2026
   METRO MONTE PO:    { nome: "Catania – Metro Monte Po" }
   MONTE PO:
     nome: "Catania – Monte Po (centro)"

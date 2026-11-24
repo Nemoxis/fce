@@ -1,26 +1,26 @@
 {
  "versions": [
   {
-   "valid_from": "2026-09-15",
-   "file": "orario-2026-09-15.json",
-   "trips": 261,
-   "source": {
-    "file": "autolinee-2026-09-15.pdf",
-    "url": null,
-    "sha256": "77bf9169af5070bb0bfddf25bdda0913f68b297a2f8a43cd12ef7d5fa65374ac"
-   },
-   "generated": "2026-10-08T12:13:57+00:00"
-  },
-  {
    "valid_from": "2026-10-05",
    "file": "orario-2026-10-05.json",
+   "trips": 269,
+   "source": {
+    "file": "autolinee-2026-10-05.pdf",
+    "url": "https://www.circumetnea.it/download/orario-autolinee-in-vigore-dal-5-ottobre-2026/?wpdmdl=18300&refresh=6ac168e2b97c91791060194",
+    "sha256": "2d0afd6919861156c421108f588efdba6c84d3a1271cb824ba19d3a3cf28d9df"
+   },
+   "generated": "2026-11-24T17:13:47+00:00"
+  },
+  {
+   "valid_from": "2026-11-23",
+   "file": "orario-2026-11-23.json",
    "trips": 269,
    "source": {
     "file": "autolinee-2026-11-23.pdf",
     "url": "https://www.circumetnea.it/download/orario-autolinee-in-vigore-dal-23-novembre-2026/?wpdmdl=18445&refresh=6afef4622651d1795093602",
     "sha256": "d5a8456f12a1d9f56d36cbe91141b78b59cfd8800e32902be24a44fa9c09dd21"
    },
-   "generated": "2026-11-19T13:26:24+00:00"
+   "generated": "2026-11-24T17:14:19+00:00"
   }
  ],
  "status": {

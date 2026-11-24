@@ -27,11 +27,11 @@ jobs:
     timeout-minutes: 25
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy1.outputs.page_url || steps.deploy2.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -60,12 +60,24 @@ jobs:
           fi
 
       - name: Prepara il sito
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: docs
 
+      # A volte GitHub non "vede" subito il pacchetto appena caricato e la pubblicazione
+      # fallisce con "No artifacts named github-pages". Se succede si riprova dopo un minuto.
       - name: Pubblica su GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v4
+        id: deploy1
+        continue-on-error: true
+        uses: actions/deploy-pages@v5
+
+      - name: Attendi prima di riprovare
+        if: steps.deploy1.outcome == 'failure'
+        run: sleep 60
+
+      - name: Pubblica su GitHub Pages (secondo tentativo)
+        id: deploy2
+        if: steps.deploy1.outcome == 'failure'
+        uses: actions/deploy-pages@v5

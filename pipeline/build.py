@@ -157,7 +157,11 @@ def build(pdf_path: Path, valid_from: str | None = None, source_url: str | None 
         for t in p.trips:
             report["warnings"] += [f"p.{t.page} corsa {t.code}: {w}" for w in t.warnings]
 
-    vf = valid_from or valid_from_pdf(pages)
+    in_pdf = valid_from_pdf(pages)
+    vf = valid_from or in_pdf
+    if valid_from and in_pdf and in_pdf != valid_from:
+        report["warnings"].append(
+            f"la data nel PDF ({in_pdf}) e' diversa da quella del titolo sul sito ({valid_from}): uso quella del sito")
     if not vf:
         raise SystemExit("Impossibile capire la data 'in vigore dal': passala con --valid-from AAAA-MM-GG")
     report["valid_from"] = vf
